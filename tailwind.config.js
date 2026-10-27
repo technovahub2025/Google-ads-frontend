@@ -1,0 +1,62 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './index.html',
+    './App.jsx',
+    './main.jsx',
+    './components/**/*.{js,jsx}',
+    './context/**/*.{js,jsx}',
+    './data/**/*.{js,jsx}',
+    './pages/**/*.{js,jsx}',
+    './services/**/*.{js,jsx}',
+    './utils/**/*.{js,jsx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#0f5238',
+        'on-primary': '#ffffff',
+        secondary: '#386a55',
+        'secondary-container': '#c0ecd2',
+        surface: '#f7f9f7',
+        'on-surface': '#191c1a',
+        'on-surface-variant': '#404943',
+        'surface-container': '#ecefeb',
+        'surface-container-low': '#f1f4f0',
+        'surface-container-lowest': '#ffffff',
+        'surface-variant': '#dce4dc',
+        background: '#f7f9f7',
+        error: '#ba1a1a',
+        'on-error': '#ffffff',
+        warning: '#8a6100',
+        'on-warning-container': '#2b1b00',
+        'google-ads-green': '#34a853',
+        'google-ads-blue': '#4285f4',
+      },
+      boxShadow: {
+        soft: '0 2px 8px rgb(15 82 56 / 8%)',
+      },
+      spacing: {
+        gutter: '1.5rem',
+        'stack-lg': '2rem',
+        'margin-mobile': '1rem',
+        'margin-desktop': '2rem',
+      },
+      fontSize: {
+        'headline-md': ['1.5rem', { lineHeight: '2rem' }],
+        'headline-sm': ['1.25rem', { lineHeight: '1.75rem' }],
+        'body-md': ['0.875rem', { lineHeight: '1.25rem' }],
+        'label-md': ['0.875rem', { lineHeight: '1.25rem' }],
+        'label-sm': ['0.75rem', { lineHeight: '1rem' }],
+      },
+      fontFamily: {
+        'headline-md': ['Inter', 'Arial', 'sans-serif'],
+        'headline-sm': ['Inter', 'Arial', 'sans-serif'],
+        'body-md': ['Inter', 'Arial', 'sans-serif'],
+        'label-md': ['Inter', 'Arial', 'sans-serif'],
+        'label-sm': ['Inter', 'Arial', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
