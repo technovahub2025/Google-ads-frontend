@@ -8,12 +8,7 @@ export default function Connected() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    markConnected({
-      id: '1234567890',
-      name: 'Nexion Marketing',
-      currency: 'INR',
-      timeZone: 'Asia/Kolkata',
-    })
+    markConnected()
 
     const timer = setInterval(() => {
       setCountdown((prev) => {

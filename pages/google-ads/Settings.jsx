@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 import ConfirmDialog from '../../components/google-ads/ConfirmDialog.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
+import { GOOGLE_ADS_BACKEND } from '../../config/googleAdsConfig.js'
 
 export default function Settings() {
   const { isConnected, account, disconnect, isLoading } = useGoogleAds()
@@ -118,7 +119,7 @@ export default function Settings() {
             Google Ads data. No credentials are stored in the frontend.
           </p>
           <p className="text-on-surface-variant">
-            The Google Ads backend at <code className="bg-surface-container-low px-2 py-1 rounded text-google-ads-blue">http://localhost:8000</code> handles
+            The Google Ads backend at <code className="bg-surface-container-low px-2 py-1 rounded text-google-ads-blue">{GOOGLE_ADS_BACKEND || window.location.origin}</code> handles
             all OAuth token management. Tokens are securely stored on the backend.
           </p>
           <p className="text-on-surface-variant">

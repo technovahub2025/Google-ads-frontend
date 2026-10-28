@@ -9,14 +9,7 @@ import {
   mockBudgets,
   mockReports,
 } from '../data/googleAdsMockData.js'
-
-const MOCK_MODE = import.meta.env.DEV && import.meta.env.VITE_MOCK_INTEGRATIONS === 'true'
-
-const MOCK_ACCOUNT = { id: 'demo-google-ads-account', name: 'Demo Google Ads Account', customerId: '123-456-7890' }
-
-const GOOGLE_ADS_BACKEND =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_ADS_API_URL) ||
-  'http://localhost:8000'
+import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE } from '../config/googleAdsConfig.js'
 
 async function googleAdsFetch(endpoint, options = {}) {
   const url = `${GOOGLE_ADS_BACKEND}${endpoint}`

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { googleAdsApi, MOCK_MODE } from '../services/googleAdsApi.js'
+import { MOCK_ACCOUNT } from '../config/googleAdsConfig.js'
 
 const GoogleAdsContext = createContext()
 
@@ -10,14 +11,14 @@ const STORAGE_KEYS = {
 
 export function GoogleAdsProvider({ children }) {
   const [isConnected, setIsConnected] = useState(MOCK_MODE)
-  const [account, setAccount] = useState(MOCK_MODE ? { id: 'demo-google-ads-account', name: 'Demo Google Ads Account', customerId: '123-456-7890' } : null)
+  const [account, setAccount] = useState(MOCK_MODE ? MOCK_ACCOUNT : null)
   const [isLoading, setIsLoading] = useState(!MOCK_MODE)
   const [error, setError] = useState(null)
 
   const checkConnection = useCallback(async () => {
     if (MOCK_MODE) {
       setIsConnected(true)
-      setAccount({ id: 'demo-google-ads-account', name: 'Demo Google Ads Account', customerId: '123-456-7890' })
+      setAccount(MOCK_ACCOUNT)
       setError(null)
       setIsLoading(false)
       return
@@ -55,7 +56,7 @@ export function GoogleAdsProvider({ children }) {
   const connect = async () => {
     setError(null)
     if (MOCK_MODE) {
-      markConnected({ id: 'demo-google-ads-account', name: 'Demo Google Ads Account', customerId: '123-456-7890' })
+      markConnected(MOCK_ACCOUNT)
       window.location.href = '/google-ads'
       return
     }
