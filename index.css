@@ -8,6 +8,10 @@ html {
   font-family: Inter, Arial, sans-serif;
   color: #191c1a;
   background: #f7f9f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -19,4 +23,21 @@ body {
 button,
 select {
   font: inherit;
+}
+
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid rgb(15 82 56 / 35%);
+  outline-offset: 2px;
+}
+
+::selection {
+  color: #fff;
+  background: #0f5238;
 }

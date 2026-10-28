@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 import GoogleAdsSidebar from './GoogleAdsSidebar.jsx'
 import ConnectionStatus from './ConnectionStatus.jsx'
@@ -20,7 +20,6 @@ const breadcrumbMap = {
 export default function GoogleAdsLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate()
   const { isConnected, isMockMode } = useGoogleAds()
 
   useEffect(() => {
@@ -32,8 +31,7 @@ export default function GoogleAdsLayout() {
   const breadcrumbs = breadcrumbMap[location.pathname] || [{ label: 'Overview' }]
 
   if (!isConnected) {
-    navigate('/google-ads/connect', { replace: true })
-    return null
+    return <Navigate to="/google-ads/connect" replace />
   }
 
   return (
@@ -56,14 +54,14 @@ export default function GoogleAdsLayout() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto bg-surface">
-          <div className="p-margin-mobile md:p-margin-desktop">
+        <div className="min-h-screen flex-1 bg-surface">
+          <div className="mx-auto w-full max-w-[1600px] p-margin-mobile md:p-margin-desktop">
             {isMockMode && (
               <div role="status" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 <strong>Local demo mode:</strong> showing sample data. Google Ads is not actually connected; OAuth and backend requests are disabled for this development session.
               </div>
             )}
-            <div className="flex items-center justify-between mb-stack-lg flex-wrap gap-3">
+            <div className="mb-stack-lg flex min-h-10 items-center justify-between gap-3 flex-wrap border-b border-surface-variant pb-4">
               <Breadcrumbs items={breadcrumbs} />
               <ConnectionStatus />
             </div>

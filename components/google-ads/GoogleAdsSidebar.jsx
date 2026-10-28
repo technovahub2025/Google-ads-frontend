@@ -1,5 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom'
-import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
+import { NavLink } from 'react-router-dom'
 import ConnectionStatus from './ConnectionStatus.jsx'
 
 const navItems = [
@@ -15,8 +14,6 @@ const navItems = [
 ]
 
 export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
-  const location = useLocation()
-
   return (
     <>
       {sidebarOpen && (
@@ -27,7 +24,7 @@ export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
       )}
 
       <nav
-        className={`fixed md:sticky inset-y-0 left-0 z-50 w-64 bg-surface-container shadow-lg flex-col p-stack-md space-y-unit transform transition-transform duration-200 ease-in-out ${
+        className={`fixed md:sticky inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-surface-variant bg-surface-container-lowest p-stack-md shadow-soft space-y-unit transform transition-transform duration-200 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 md:flex`}
       >
@@ -60,7 +57,7 @@ export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
                 `flex items-center px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                   isActive
                     ? 'bg-primary text-on-primary'
-                    : 'text-on-surface-variant hover:bg-surface-container-highest hover:translate-x-1'
+                    : 'text-on-surface-variant hover:bg-surface-container-highest'
                 }`
               }
             >

@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 export default function StatCard({
   title,
   value,
@@ -26,7 +24,7 @@ export default function StatCard({
 
   return (
     <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft transition-all group">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex min-h-9 items-center justify-between gap-3 mb-3">
         <h3 className="font-label-md text-label-md text-on-surface-variant">{title}</h3>
         <div className={`w-9 h-9 rounded-full flex items-center justify-center ${iconBg} ${iconColor}`}>
           <span className="material-symbols-outlined text-[20px]">{icon}</span>
@@ -40,7 +38,7 @@ export default function StatCard({
         </div>
       ) : (
         <>
-          <p className="font-headline-md text-headline-md text-on-surface font-semibold mb-1 break-all">
+          <p className="font-headline-md text-headline-md text-on-surface font-semibold mb-1 break-words tabular-nums">
             {displayValue}
           </p>
           {subtitle && (

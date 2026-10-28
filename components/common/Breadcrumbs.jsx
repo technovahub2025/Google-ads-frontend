@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export default function Breadcrumbs({ items }) {
   return (
-    <nav aria-label="Breadcrumb" className="flex text-sm text-on-surface-variant mb-8 font-body-md">
+    <nav aria-label="Breadcrumb" className="flex min-w-0 text-sm text-on-surface-variant font-body-md">
       <ol className="inline-flex items-center space-x-1 md:space-x-3">
         {items.map((item, index) => (
           <li key={index} className="inline-flex items-center">

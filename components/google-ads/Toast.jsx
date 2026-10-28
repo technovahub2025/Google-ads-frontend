@@ -14,7 +14,7 @@ export default function Toast({ message, type = 'info', duration = 4000, onClose
 
   const typeStyles = {
     success: 'bg-surface-container-high text-on-surface border border-surface-variant',
-    error: 'bg-error-container text-on-error border border-error',
+    error: 'bg-error-container text-error border border-error',
     info: 'bg-surface-container-high text-on-surface-variant border border-surface-variant',
     warning: 'bg-tertiary-container text-on-tertiary border border-tertiary',
   }
@@ -27,14 +27,14 @@ export default function Toast({ message, type = 'info', duration = 4000, onClose
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 z-[100] flex max-w-[calc(100vw-2rem)] flex-col gap-2 sm:bottom-6 sm:right-6">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg transition-all duration-300 ${typeStyles[type]} ${
+        className={`flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg transition-all duration-300 ${typeStyles[type]} ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
         }`}
       >
         <span className="material-symbols-outlined text-[20px]">{icons[type]}</span>
-        <span className="font-body-md text-body-md">{message}</span>
+        <span className="min-w-0 break-words font-body-md text-body-md">{message}</span>
         <button
           onClick={() => {
             setVisible(false)
