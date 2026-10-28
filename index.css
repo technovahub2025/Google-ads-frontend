@@ -6,8 +6,8 @@ html {
   min-width: 320px;
   min-height: 100%;
   font-family: Inter, Arial, sans-serif;
-  color: #191c1a;
-  background: #f7f9f7;
+  color: #111827;
+  background: #f8f9fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -33,11 +33,11 @@ select {
 }
 
 :focus-visible {
-  outline: 3px solid rgb(15 82 56 / 35%);
+  outline: 3px solid rgb(47 128 237 / 35%);
   outline-offset: 2px;
 }
 
 ::selection {
   color: #fff;
-  background: #0f5238;
+  background: #2f80ed;
 }

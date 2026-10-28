@@ -166,7 +166,7 @@ export default function Dashboard() {
             {
               label: 'Spend',
               data: mockTimeSeriesData.spend,
-              borderColor: '#0f5238',
+              borderColor: '#2f80ed',
             },
           ]}
           loading={loading}

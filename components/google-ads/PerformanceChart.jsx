@@ -16,7 +16,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineController, LineE
 
 export default function PerformanceChart({ title, labels, datasets, loading = false, height = 'h-60' }) {
   const defaultColors = {
-    spend: { border: '#0f5238', bg: 'rgba(15, 82, 56, 0.08)' },
+    spend: { border: '#2f80ed', bg: 'rgba(47, 128, 237, 0.08)' },
     clicks: { border: '#4285f4', bg: 'rgba(66, 133, 244, 0.08)' },
     conversions: { border: '#34a853', bg: 'rgba(52, 168, 83, 0.08)' },
   }
@@ -28,11 +28,11 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
     datasets: safeDatasets.map((ds, i) => ({
       label: ds.label,
       data: ds.data,
-      borderColor: ds.borderColor || defaultColors[ds.key]?.border || '#0f5238',
+      borderColor: ds.borderColor || defaultColors[ds.key]?.border || '#2f80ed',
       backgroundColor: ds.backgroundColor || defaultColors[ds.key]?.bg || 'rgba(15, 82, 56, 0.08)',
       borderWidth: 2,
       pointBackgroundColor: '#ffffff',
-      pointBorderColor: ds.borderColor || '#0f5238',
+      pointBorderColor: ds.borderColor || '#2f80ed',
       pointBorderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
@@ -51,13 +51,13 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
         position: 'top',
         labels: {
           font: { family: 'Inter, Arial, sans-serif', size: 12 },
-          color: '#404943',
+          color: '#718096',
           usePointStyle: true,
           padding: 12,
         },
       },
       tooltip: {
-        backgroundColor: '#0f5238',
+        backgroundColor: '#2f80ed',
         titleFont: { family: 'Inter, Arial, sans-serif', size: 12 },
         bodyFont: { family: 'Inter, Arial, sans-serif', size: 13, weight: 'bold' },
         padding: 10,
@@ -70,13 +70,13 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
     scales: {
       x: {
         grid: { display: false, drawBorder: false },
-        ticks: { font: { family: 'Inter, Arial, sans-serif', size: 11 }, color: '#404943' },
+        ticks: { font: { family: 'Inter, Arial, sans-serif', size: 11 }, color: '#718096' },
       },
       y: {
         grid: { color: '#e6e5e4', drawBorder: false, borderDash: [4, 4] },
         ticks: {
           font: { family: 'Inter, Arial, sans-serif', size: 11 },
-          color: '#404943',
+          color: '#718096',
           callback: (value) => (value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value.toString()),
         },
         beginAtZero: true,
