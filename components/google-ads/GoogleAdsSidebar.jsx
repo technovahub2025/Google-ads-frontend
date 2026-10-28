@@ -4,7 +4,7 @@ const navItems = [
   { label: 'Overview', icon: 'dashboard', href: '/google-ads' },
   { label: 'Campaigns', icon: 'campaign', href: '/google-ads/campaigns' },
   { label: 'Ad Groups', icon: 'view_quilt', href: '/google-ads/ad-groups' },
-  { label: 'Ads', icon: 'format_stroke', href: '/google-ads/ads' },
+  { label: 'Ads', icon: 'ads_click', href: '/google-ads/ads' },
   { label: 'Keywords', icon: 'search', href: '/google-ads/keywords' },
   { label: 'Assets', icon: 'image', href: '/google-ads/assets' },
   { label: 'Budgets', icon: 'account_balance_wallet', href: '/google-ads/budgets' },
