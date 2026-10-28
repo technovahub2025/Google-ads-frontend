@@ -7,7 +7,6 @@ import PerformanceChart from '../../components/google-ads/PerformanceChart.jsx'
 import CampaignTable from '../../components/google-ads/CampaignTable.jsx'
 import AccountSelector from '../../components/google-ads/AccountSelector.jsx'
 import DateRangeSelector from '../../components/google-ads/DateRangeSelector.jsx'
-import Toast from '../../components/google-ads/Toast.jsx'
 
 export default function Dashboard() {
   const { account } = useGoogleAds()
@@ -18,7 +17,6 @@ export default function Dashboard() {
   const [error, setError] = useState(null)
   const [selectedAccount, setSelectedAccount] = useState('')
   const [dateRange, setDateRange] = useState('last_30_days')
-  const [showToast, setShowToast] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,6 +66,12 @@ export default function Dashboard() {
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
         </div>
       </div>
+
+      {error && (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
         <StatCard
@@ -201,13 +205,6 @@ export default function Dashboard() {
 
       <CampaignTable campaigns={campaigns} loading={loading} />
 
-      {showToast && (
-        <Toast
-          message={error || 'Data updated successfully'}
-          type={error ? 'error' : 'success'}
-          onClose={() => setShowToast(false)}
-        />
-      )}
     </div>
   )
 }

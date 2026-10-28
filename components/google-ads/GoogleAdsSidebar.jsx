@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom'
-import ConnectionStatus from './ConnectionStatus.jsx'
 
 const navItems = [
   { label: 'Overview', icon: 'dashboard', href: '/google-ads' },
@@ -40,10 +39,6 @@ export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
               Nexion Module
             </p>
           </div>
-        </div>
-
-        <div className="mb-stack-md px-2">
-          <ConnectionStatus />
         </div>
 
         <div className="flex-1 space-y-1 overflow-y-auto pr-2">

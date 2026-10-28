@@ -3,19 +3,6 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 import GoogleAdsSidebar from './GoogleAdsSidebar.jsx'
 import ConnectionStatus from './ConnectionStatus.jsx'
-import Breadcrumbs from '../common/Breadcrumbs.jsx'
-
-const breadcrumbMap = {
-  '/google-ads': [{ label: 'Overview' }],
-  '/google-ads/campaigns': [{ label: 'Campaigns' }],
-  '/google-ads/ad-groups': [{ label: 'Ad Groups' }],
-  '/google-ads/ads': [{ label: 'Ads' }],
-  '/google-ads/keywords': [{ label: 'Keywords' }],
-  '/google-ads/assets': [{ label: 'Assets' }],
-  '/google-ads/budgets': [{ label: 'Budgets' }],
-  '/google-ads/reports': [{ label: 'Reports' }],
-  '/google-ads/settings': [{ label: 'Settings' }],
-}
 
 export default function GoogleAdsLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -27,8 +14,6 @@ export default function GoogleAdsLayout() {
       setSidebarOpen(false)
     }
   }, [location.pathname])
-
-  const breadcrumbs = breadcrumbMap[location.pathname] || [{ label: 'Overview' }]
 
   if (!isConnected) {
     return <Navigate to="/google-ads/connect" replace />
@@ -49,9 +34,6 @@ export default function GoogleAdsLayout() {
             </button>
             <h1 className="font-headline-sm text-headline-sm font-bold text-primary m-0">Google Ads</h1>
           </div>
-          <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center">
-            <span className="material-symbols-outlined text-secondary text-[18px]">ads_click</span>
-          </div>
         </header>
 
         <div className="min-h-screen flex-1 bg-surface">
@@ -61,8 +43,7 @@ export default function GoogleAdsLayout() {
                 <strong>Local demo mode:</strong> showing sample data. Google Ads is not actually connected; OAuth and backend requests are disabled for this development session.
               </div>
             )}
-            <div className="mb-stack-lg flex min-h-10 items-center justify-between gap-3 flex-wrap border-b border-surface-variant pb-4">
-              <Breadcrumbs items={breadcrumbs} />
+            <div className="mb-stack-lg flex min-h-10 items-center justify-end border-b border-surface-variant pb-4">
               <ConnectionStatus />
             </div>
 
