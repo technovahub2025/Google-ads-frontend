@@ -9,9 +9,13 @@ import {
   mockBudgets,
   mockReports,
 } from '../data/googleAdsMockData.js'
-import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE } from '../config/googleAdsConfig.js'
+import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE, NEXION_USER_ID } from '../config/googleAdsConfig.js'
 
 async function googleAdsFetch(endpoint, options = {}) {
+  if (!GOOGLE_ADS_BACKEND) {
+    throw new Error('Set VITE_GOOGLE_ADS_API_URL to the Google Ads backend URL.')
+  }
+
   const url = `${GOOGLE_ADS_BACKEND}${endpoint}`
   const res = await fetch(url, {
     ...options,
@@ -30,7 +34,9 @@ async function googleAdsFetch(endpoint, options = {}) {
   if (!res.ok) {
     const message =
       data?.message || data?.error || `Request failed with status ${res.status}`
-    throw new Error(message)
+    const error = new Error(message)
+    error.status = res.status
+    throw error
   }
 
   return data
@@ -43,21 +49,19 @@ export const googleAdsApi = {
 
   getAuthUrl: async () => {
     if (MOCK_MODE) return { success: true, mock: true, authUrl: null, message: 'Mock mode is enabled; no Google OAuth request was made.' }
-    const data = await googleAdsFetch('/api/google-ads/auth')
+    if (!NEXION_USER_ID) throw new Error('Set VITE_NEXION_USER_ID to the logged-in Nexion user ID.')
+    const data = await googleAdsFetch(`/api/google-ads/auth?userId=${encodeURIComponent(NEXION_USER_ID)}`)
     return data
   },
 
   checkConnection: async () => {
     if (MOCK_MODE) return { connected: true, account: MOCK_ACCOUNT, mock: true }
+    if (!NEXION_USER_ID) throw new Error('Set VITE_NEXION_USER_ID to the logged-in Nexion user ID.')
     try {
-      const data = await googleAdsFetch('/api/google-ads/status')
-      return data
-    } catch {
-      const stored = localStorage.getItem('nexion_google_ads_connected')
-      return {
-        connected: stored === 'true',
-        account: JSON.parse(localStorage.getItem('nexion_google_ads_account') || 'null'),
-      }
+      return await googleAdsFetch(`/api/google-ads/connection?userId=${encodeURIComponent(NEXION_USER_ID)}`)
+    } catch (error) {
+      if (error.status === 404) return { success: true, connected: false }
+      throw error
     }
   },
 
@@ -166,4 +170,4 @@ export const googleAdsApi = {
   },
 }
 
-export { GOOGLE_ADS_BACKEND, MOCK_MODE }
+export { GOOGLE_ADS_BACKEND, MOCK_MODE, NEXION_USER_ID }

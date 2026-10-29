@@ -5,16 +5,14 @@ import GoogleAdsLogo from '../../components/google-ads/GoogleAdsLogo.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
 
 export default function Connect() {
-  const { connect, error, isLoading, isMockMode } = useGoogleAds()
+  const { connect, error, isLoading, isConnecting, isMockMode } = useGoogleAds()
   const [showToast, setShowToast] = useState(false)
 
   const handleConnect = async () => {
     try {
       await connect()
-      if (!error) {
-        setShowToast(true)
-      }
-    } catch (err) {
+      setShowToast(true)
+    } catch {
       setShowToast(true)
     }
   }
@@ -55,6 +53,7 @@ export default function Connect() {
 
           <button
             onClick={handleConnect}
+            disabled={isConnecting}
             className="w-full flex items-center justify-center gap-3 bg-google-ads-blue text-white font-label-md text-label-md py-3 px-6 rounded-xl hover:bg-google-ads-blue/90 transition-all duration-200 shadow-sm"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -63,7 +62,7 @@ export default function Connect() {
                 fill="currentColor"
               />
             </svg>
-            {isMockMode ? 'Open Demo Dashboard' : 'Connect Google Ads'}
+            {isConnecting ? 'Connecting...' : isMockMode ? 'Open Demo Dashboard' : 'Connect Google Ads'}
           </button>
 
           <p className="font-label-sm text-label-sm text-on-surface-variant mt-4">

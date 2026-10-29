@@ -4,16 +4,12 @@ import { MOCK_ACCOUNT } from '../config/googleAdsConfig.js'
 
 const GoogleAdsContext = createContext()
 
-const STORAGE_KEYS = {
-  connected: 'nexion_google_ads_connected',
-  account: 'nexion_google_ads_account',
-}
-
 export function GoogleAdsProvider({ children }) {
   const [isConnected, setIsConnected] = useState(MOCK_MODE)
   const [account, setAccount] = useState(MOCK_MODE ? MOCK_ACCOUNT : null)
   const [isLoading, setIsLoading] = useState(!MOCK_MODE)
   const [error, setError] = useState(null)
+  const [isConnecting, setIsConnecting] = useState(false)
 
   const checkConnection = useCallback(async () => {
     if (MOCK_MODE) {
@@ -28,26 +24,12 @@ export function GoogleAdsProvider({ children }) {
     try {
       const result = await googleAdsApi.checkConnection()
       const connected = result?.connected === true
-      const accountInfo = result?.account || null
-
-      if (connected) {
-        localStorage.setItem(STORAGE_KEYS.connected, 'true')
-        if (accountInfo) {
-          localStorage.setItem(STORAGE_KEYS.account, JSON.stringify(accountInfo))
-        }
-      }
-
       setIsConnected(connected)
-      setAccount(accountInfo)
-    } catch {
-      const stored = localStorage.getItem(STORAGE_KEYS.connected)
-      setIsConnected(stored === 'true')
-      if (stored === 'true') {
-        const storedAccount = localStorage.getItem(STORAGE_KEYS.account)
-        setAccount(storedAccount ? JSON.parse(storedAccount) : null)
-      } else {
-        setAccount(null)
-      }
+      setAccount(result?.account || null)
+    } catch (err) {
+      setIsConnected(false)
+      setAccount(null)
+      setError(err.message || 'Unable to check Google Ads connection.')
     } finally {
       setIsLoading(false)
     }
@@ -60,6 +42,7 @@ export function GoogleAdsProvider({ children }) {
       window.location.href = '/google-ads'
       return
     }
+    setIsConnecting(true)
     try {
       const result = await googleAdsApi.getAuthUrl()
 
@@ -67,11 +50,11 @@ export function GoogleAdsProvider({ children }) {
         throw new Error(result?.message || 'Failed to get Google Ads authorization URL')
       }
 
-      localStorage.setItem(STORAGE_KEYS.oauth_start, 'true')
-
       window.location.href = result.authUrl
     } catch (err) {
       setError(err.message || 'Failed to connect to Google Ads. Please try again.')
+    } finally {
+      setIsConnecting(false)
     }
   }
 
@@ -83,9 +66,6 @@ export function GoogleAdsProvider({ children }) {
     } catch (err) {
       console.error('Disconnect error (proceeding with local cleanup):', err.message)
     } finally {
-      localStorage.removeItem(STORAGE_KEYS.connected)
-      localStorage.removeItem(STORAGE_KEYS.account)
-      localStorage.removeItem(STORAGE_KEYS.oauth_start)
       setIsConnected(false)
       setAccount(null)
       setIsLoading(false)
@@ -93,10 +73,6 @@ export function GoogleAdsProvider({ children }) {
   }
 
   const markConnected = (accountInfo = null) => {
-    localStorage.setItem(STORAGE_KEYS.connected, 'true')
-    if (accountInfo) {
-      localStorage.setItem(STORAGE_KEYS.account, JSON.stringify(accountInfo))
-    }
     setIsConnected(true)
     setAccount(accountInfo)
   }
@@ -104,21 +80,7 @@ export function GoogleAdsProvider({ children }) {
   const clearError = () => setError(null)
 
   useEffect(() => {
-    const query = new URLSearchParams(window.location.search)
-    const status = query.get('status')
-    const connectedParam = query.get('connected')
-    const successParam = query.get('success')
-
-    const flagSet = status === 'success' || connectedParam === 'true' || successParam === 'true'
-
-    if (flagSet) {
-      markConnected()
-      const newUrl = window.location.pathname.replace(/\/(connected|callback)$/, '') || '/google-ads'
-      window.history.replaceState({}, '', newUrl)
-    }
-
     checkConnection()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -129,6 +91,7 @@ export function GoogleAdsProvider({ children }) {
         account,
         isLoading,
         error,
+        isConnecting,
         connect,
         disconnect,
         checkConnection,

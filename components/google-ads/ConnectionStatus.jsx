@@ -1,7 +1,7 @@
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 
 export default function ConnectionStatus({ compact = false }) {
-  const { isConnected, account, isLoading, connect, disconnect } = useGoogleAds()
+  const { isConnected, account, isLoading, isConnecting, error, connect } = useGoogleAds()
 
   if (isLoading) {
     return (
@@ -37,15 +37,17 @@ export default function ConnectionStatus({ compact = false }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <span className="w-2 h-2 rounded-full bg-error"></span>
       <span className={`text-error ${compact ? 'font-label-sm text-label-sm' : 'font-body-md'}`}>Not Connected</span>
       <button
         onClick={connect}
+        disabled={isConnecting}
         className="ml-2 px-3 py-1 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary/90 transition-colors"
       >
-        Connect
+        {isConnecting ? 'Connecting...' : 'Connect'}
       </button>
+      {error && <span role="alert" className="w-full text-sm text-error">{error}</span>}
     </div>
   )
 }

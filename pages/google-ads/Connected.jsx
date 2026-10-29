@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 
 export default function Connected() {
-  const { markConnected, error: contextError } = useGoogleAds()
+  const { isConnected, isLoading, error: contextError, checkConnection } = useGoogleAds()
   const [countdown, setCountdown] = useState(5)
   const navigate = useNavigate()
 
   useEffect(() => {
-    markConnected()
+    checkConnection()
+  }, [checkConnection])
 
+  useEffect(() => {
+    if (!isConnected) return undefined
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -22,12 +25,27 @@ export default function Connected() {
     }, 1000)
 
     return () => clearInterval(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isConnected, navigate])
 
   const handleContinue = useCallback(() => {
     navigate('/google-ads')
   }, [navigate])
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-surface"><p className="font-body-md text-body-md text-on-surface-variant">Checking Google Ads connection...</p></div>
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface py-12 px-4">
+        <div className="max-w-md w-full bg-surface-container-lowest border border-surface-variant rounded-2xl shadow-soft p-10 text-center">
+          <h1 className="font-headline-lg text-headline-lg text-primary mb-4">Google Ads Not Connected</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant mb-6">{contextError || 'The backend has not confirmed a Google Ads connection yet.'}</p>
+          <button onClick={() => navigate('/google-ads/connect')} className="bg-primary text-on-primary font-label-md py-3 px-6 rounded-xl">Return to connection</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface py-12 px-4">
