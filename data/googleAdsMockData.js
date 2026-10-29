@@ -1,7 +1,7 @@
 export const mockAccounts = [
   {
     id: '1234567890',
-    name: 'Nexion Marketing',
+    name: 'Demo Google Ads Account',
     currency: 'INR',
     timeZone: 'Asia/Kolkata',
     manager: false,

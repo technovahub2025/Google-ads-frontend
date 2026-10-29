@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { googleAdsApi } from '../../services/googleAdsApi.js'
+import { GOOGLE_ADS_DEVELOPMENT_MODE } from '../../config/googleAdsConfig.js'
 
 const STEPS = [
   'Campaign goal', 'Campaign type', 'Campaign information', 'Budget', 'Bidding',
@@ -102,7 +103,10 @@ function CheckOption({ label, checked, onChange }) {
 
 export default function CampaignCreationWizard({ connectionId, accounts, accountsLoading, onClose, onCreated }) {
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState(makeInitialForm)
+  const [form, setForm] = useState(() => ({
+    ...makeInitialForm(),
+    customerId: accounts.length ? accountFields(accounts[0]).id : '',
+  }))
   const [locationInput, setLocationInput] = useState('')
   const [languageInput, setLanguageInput] = useState('')
   const [error, setError] = useState('')
@@ -119,6 +123,12 @@ export default function CampaignCreationWizard({ connectionId, accounts, account
       ? 'ROAS'
       : null
   const targetIsRequired = ['TARGET_CPA', 'TARGET_ROAS'].includes(form.biddingStrategy)
+
+  useEffect(() => {
+    if (!form.customerId && accounts.length > 0) {
+      update('customerId', accountFields(accounts[0]).id)
+    }
+  }, [accounts, form.customerId])
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
   const updateTypeSetting = (key, value) => setForm((current) => ({
@@ -186,7 +196,7 @@ export default function CampaignCreationWizard({ connectionId, accounts, account
         return
       }
     }
-    if (!connectionId) {
+    if (!connectionId && !GOOGLE_ADS_DEVELOPMENT_MODE) {
       setError('No Google Ads connection is available. Connect a Google Ads account and try again.')
       return
     }
@@ -247,7 +257,7 @@ export default function CampaignCreationWizard({ connectionId, accounts, account
           : backendMessage || 'The backend did not confirm that a campaign was created.')
       }
 
-      await onCreated(form.customerId)
+      await onCreated(result?.data?.campaign || null, form.customerId)
       setForm(makeInitialForm())
       setStep(0)
       onClose(true)

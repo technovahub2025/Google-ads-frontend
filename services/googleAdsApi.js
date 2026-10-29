@@ -48,13 +48,13 @@ export const googleAdsApi = {
      ============================================ */
 
   getAuthUrl: async () => {
-    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) return { success: true, mock: true, authUrl: null, message: 'Mock mode is enabled; no Google OAuth request was made.' }
+    if (MOCK_MODE) return { success: true, mock: true, authUrl: null, message: 'Development mode is enabled; Google OAuth is disabled.' }
     const data = await googleAdsFetch('/api/google-ads/auth')
     return data
   },
 
   checkConnection: async () => {
-    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) return { connected: true, account: MOCK_ACCOUNT, mock: true }
+    if (MOCK_MODE) return { success: true, connected: true, account: mockAccounts[0] || MOCK_ACCOUNT, mock: true }
     try {
       return await googleAdsFetch('/api/google-ads/connection')
     } catch (error) {
@@ -107,11 +107,13 @@ export const googleAdsApi = {
   },
 
   getCustomerAccounts: async (connectionId) => {
+    if (MOCK_MODE) return { success: true, accounts: mockAccounts }
     if (!connectionId) throw new Error('A Google Ads connection is required to load customer accounts.')
     return googleAdsFetch(`/api/google-ads/customer-accounts?connectionId=${encodeURIComponent(connectionId)}`)
   },
 
   getCustomerCampaigns: async (connectionId, customerId) => {
+    if (MOCK_MODE) return { success: true, campaigns: mockCampaigns }
     if (!connectionId || !customerId) {
       throw new Error('A Google Ads connection and customer account are required to load campaigns.')
     }
@@ -119,6 +121,32 @@ export const googleAdsApi = {
   },
 
   createCampaign: async (campaignConfiguration) => {
+    if (MOCK_MODE) {
+      const id = `demo-campaign-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+      const campaign = {
+        id,
+        name: campaignConfiguration.name,
+        status: String(campaignConfiguration.status || 'PAUSED').toLowerCase(),
+        type: campaignConfiguration.campaignType,
+        biddingStrategy: campaignConfiguration.bidding?.strategy || '—',
+        dailyBudget: Number(campaignConfiguration.budget?.amount ?? campaignConfiguration.budgetAmount ?? 0),
+        impressions: 0,
+        clicks: 0,
+        ctr: 0,
+        cpc: 0,
+        conversions: 0,
+        cost: 0,
+        goal: campaignConfiguration.goal,
+        targetCpa: campaignConfiguration.bidding?.targetCpa ?? null,
+        targetRoas: campaignConfiguration.bidding?.targetRoas ?? null,
+        locations: campaignConfiguration.targeting?.locations || [],
+        languages: campaignConfiguration.targeting?.languages || [],
+        schedule: campaignConfiguration.schedule || null,
+        networks: campaignConfiguration.networks || null,
+        campaignSettings: campaignConfiguration.campaignSettings || {},
+      }
+      return { success: true, created: true, campaignId: id, data: { created: true, campaignId: id, campaign } }
+    }
     return googleAdsFetch('/api/google-ads/campaigns', {
       method: 'POST',
       body: JSON.stringify(campaignConfiguration),

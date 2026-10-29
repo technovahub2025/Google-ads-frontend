@@ -1,25 +1,23 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { googleAdsApi, MOCK_MODE } from '../services/googleAdsApi.js'
-import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT } from '../config/googleAdsConfig.js'
+import { MOCK_ACCOUNT } from '../config/googleAdsConfig.js'
+import { mockAccounts } from '../data/googleAdsMockData.js'
 
 const GoogleAdsContext = createContext()
 
-// TEMPORARY DEV FALLBACK: use this returned connection ID for testing, then remove it.
-const TEMPORARY_TEST_CONNECTION_ID = 'USER_001'
-
 export function GoogleAdsProvider({ children }) {
-  const [isConnected, setIsConnected] = useState(false)
+  const [isConnected, setIsConnected] = useState(MOCK_MODE)
   const [connectionId, setConnectionId] = useState(null)
-  const [account, setAccount] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [account, setAccount] = useState(MOCK_MODE ? mockAccounts[0] || MOCK_ACCOUNT : null)
+  const [isLoading, setIsLoading] = useState(!MOCK_MODE)
   const [error, setError] = useState(null)
   const [isConnecting, setIsConnecting] = useState(false)
 
   const checkConnection = useCallback(async () => {
-    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) {
+    if (MOCK_MODE) {
       setIsConnected(true)
       setConnectionId(null)
-      setAccount(MOCK_ACCOUNT)
+      setAccount(mockAccounts[0] || MOCK_ACCOUNT)
       setError(null)
       setIsLoading(false)
       return
@@ -29,12 +27,10 @@ export function GoogleAdsProvider({ children }) {
     try {
       const result = await googleAdsApi.checkConnection()
       const connections = result?.connections || []
-      const activeConnection = import.meta.env.DEV
-        ? connections.find((item) => item.connectionId === TEMPORARY_TEST_CONNECTION_ID && item.connected)
-        : connections.find((item) => item.connected)
-      const selectedConnectionId = activeConnection?.connectionId || (!import.meta.env.DEV ? result?.connectionId : null)
-      setIsConnected(Boolean(selectedConnectionId && (activeConnection?.connected || result?.connected)))
-      setConnectionId(selectedConnectionId || null)
+      const activeConnection = connections.find((item) => item.connected)
+      const selectedConnectionId = activeConnection?.connectionId || result?.connectionId || null
+      setIsConnected(Boolean(result?.connected && selectedConnectionId))
+      setConnectionId(selectedConnectionId)
       setAccount(result?.account || null)
     } catch (err) {
       setIsConnected(false)
@@ -48,8 +44,8 @@ export function GoogleAdsProvider({ children }) {
 
   const connect = async () => {
     setError(null)
-    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) {
-      markConnected(MOCK_ACCOUNT)
+    if (MOCK_MODE) {
+      markConnected(mockAccounts[0] || MOCK_ACCOUNT)
       window.location.href = '/google-ads'
       return
     }
@@ -70,6 +66,12 @@ export function GoogleAdsProvider({ children }) {
   }
 
   const disconnect = async () => {
+    if (MOCK_MODE) {
+      setIsConnected(true)
+      setConnectionId(null)
+      setAccount(mockAccounts[0] || MOCK_ACCOUNT)
+      return
+    }
     setIsLoading(true)
     setError(null)
     try {
@@ -100,7 +102,7 @@ export function GoogleAdsProvider({ children }) {
       value={{
         isConnected,
         connectionId,
-        isMockMode: MOCK_MODE && !GOOGLE_ADS_BACKEND,
+        isMockMode: MOCK_MODE,
         account,
         isLoading,
         error,

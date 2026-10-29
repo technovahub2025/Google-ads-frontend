@@ -28,7 +28,7 @@ export default function Connect() {
     )
   }
 
-  if (isConnected && connectionId) {
+  if (isConnected && (connectionId || isMockMode)) {
     return <Navigate to="/google-ads" replace />
   }
 

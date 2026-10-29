@@ -40,7 +40,7 @@ export default function GoogleAdsLayout() {
           <div className="mx-auto w-full max-w-[1600px] p-margin-mobile md:p-margin-desktop">
             {isMockMode && (
               <div role="status" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <strong>Local demo mode:</strong> showing sample data. Google Ads is not actually connected; OAuth and backend requests are disabled for this development session.
+                <strong>Google Ads Development Mode:</strong> using demo account and campaign data. No Google connection or OAuth is required.
               </div>
             )}
             <div className="mb-stack-lg flex min-h-10 items-center justify-end border-b border-surface-variant pb-4">

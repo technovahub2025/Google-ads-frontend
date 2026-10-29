@@ -199,7 +199,7 @@ export default function Campaigns() {
   }
 
   const handleCreate = async () => {
-    if (!isConnected || !connectionId) {
+    if (!MOCK_MODE && (!isConnected || !connectionId)) {
       setToastMsg('Connect a Google Ads account before creating a campaign.')
       setToastType('error')
       setShowToast(true)
@@ -208,8 +208,11 @@ export default function Campaigns() {
     if (accounts.length === 0 && !accountsLoading) {
       setAccountsLoading(true)
       try {
-        const response = await googleAdsApi.getCustomerAccounts(connectionId)
-        setAccounts(response.accounts || [])
+        const response = await googleAdsApi.getCustomerAccounts(MOCK_MODE ? null : connectionId)
+        const customerAccounts = response.accounts || []
+        setAccounts(customerAccounts)
+        const firstAccount = customerAccounts[0]?.customer_client || customerAccounts[0]?.customerClient || customerAccounts[0]
+        setSelectedCustomerId(String(firstAccount?.id ?? ''))
       } catch (err) {
         setError(err.message || 'Failed to load Google Ads customer accounts.')
         return
@@ -220,8 +223,15 @@ export default function Campaigns() {
     setWizardOpen(true)
   }
 
-  const handleCampaignCreated = async (customerId) => {
+  const handleCampaignCreated = async (createdCampaign, customerId) => {
     setSelectedCustomerId(customerId)
+    if (MOCK_MODE && createdCampaign) {
+      setCampaigns((current) => [createdCampaign, ...current])
+      setToastMsg('Demo campaign added to the campaign list.')
+      setToastType('success')
+      setShowToast(true)
+      return
+    }
     try {
       await loadCampaigns(customerId)
     } catch (err) {

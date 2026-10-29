@@ -1,6 +1,8 @@
 const env = import.meta.env
 
-export const MOCK_MODE = env.DEV && env.VITE_MOCK_INTEGRATIONS === 'true'
+// TEMPORARY: switch to false to re-enable the real Google Ads connection flow.
+export const GOOGLE_ADS_DEVELOPMENT_MODE = true
+export const MOCK_MODE = GOOGLE_ADS_DEVELOPMENT_MODE
 export const GOOGLE_ADS_BACKEND = env.VITE_GOOGLE_ADS_API_URL || ''
 
 export const MOCK_ACCOUNT = {
