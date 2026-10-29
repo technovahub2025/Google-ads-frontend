@@ -170,7 +170,7 @@ export default function Dashboard() {
             {
               label: 'Spend',
               data: mockTimeSeriesData.spend,
-              borderColor: '#2f80ed',
+              borderColor: '#4285F4',
             },
           ]}
           loading={loading}

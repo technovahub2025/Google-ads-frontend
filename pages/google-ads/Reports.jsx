@@ -193,7 +193,7 @@ export default function Reports() {
             key: 'spend',
             label: 'Spend',
             data: reports?.performanceSummary?.map((r) => r.spend) || mockTimeSeriesData.spend,
-            borderColor: '#2f80ed',
+            borderColor: '#4285F4',
           },
           {
             key: 'clicks',

@@ -16,7 +16,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineController, LineE
 
 export default function PerformanceChart({ title, labels, datasets, loading = false, height = 'h-60' }) {
   const defaultColors = {
-    spend: { border: '#2f80ed', bg: 'rgba(47, 128, 237, 0.08)' },
+    spend: { border: '#4285F4', bg: 'rgba(66, 133, 244, 0.08)' },
     clicks: { border: '#4285f4', bg: 'rgba(66, 133, 244, 0.08)' },
     conversions: { border: '#34a853', bg: 'rgba(52, 168, 83, 0.08)' },
   }
@@ -28,11 +28,11 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
     datasets: safeDatasets.map((ds, i) => ({
       label: ds.label,
       data: ds.data,
-      borderColor: ds.borderColor || defaultColors[ds.key]?.border || '#2f80ed',
-      backgroundColor: ds.backgroundColor || defaultColors[ds.key]?.bg || 'rgba(15, 82, 56, 0.08)',
+      borderColor: ds.borderColor || defaultColors[ds.key]?.border || '#4285F4',
+      backgroundColor: ds.backgroundColor || defaultColors[ds.key]?.bg || 'rgba(66, 133, 244, 0.08)',
       borderWidth: 2,
       pointBackgroundColor: '#ffffff',
-      pointBorderColor: ds.borderColor || '#2f80ed',
+      pointBorderColor: ds.borderColor || '#4285F4',
       pointBorderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
@@ -57,7 +57,7 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
         },
       },
       tooltip: {
-        backgroundColor: '#2f80ed',
+        backgroundColor: '#4285F4',
         titleFont: { family: 'Inter, Arial, sans-serif', size: 12 },
         bodyFont: { family: 'Inter, Arial, sans-serif', size: 13, weight: 'bold' },
         padding: 10,

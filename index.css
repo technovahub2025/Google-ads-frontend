@@ -50,11 +50,11 @@ select {
 }
 
 :focus-visible {
-  outline: 3px solid rgb(47 128 237 / 35%);
+  outline: 3px solid rgb(66 133 244 / 35%);
   outline-offset: 2px;
 }
 
 ::selection {
   color: #fff;
-  background: #2f80ed;
+  background: #4285F4;
 }

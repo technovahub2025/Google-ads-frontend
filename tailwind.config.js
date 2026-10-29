@@ -14,11 +14,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#2f80ed',
+        primary: '#4285F4',
         'on-primary': '#ffffff',
-        'sidebar': '#34366f',
-        secondary: '#34366f',
-        'secondary-container': '#e8e9f4',
+        'sidebar': '#4285F4',
+        secondary: '#4285F4',
+        'secondary-container': '#E8F0FE',
         surface: '#f8f9fb',
         'on-surface': '#111827',
         'on-surface-variant': '#718096',
@@ -34,16 +34,17 @@ export default {
         'google-ads-green': '#34a853',
         'google-ads-blue': '#4285f4',
         'google-ads-red': '#ea4335',
-        gold: '#b7791f',
+        'google-ads-yellow': '#FBBC04',
+        gold: '#FBBC04',
         tertiary: '#765b00',
-        'tertiary-container': '#ffdf91',
-        'on-tertiary': '#302400',
+        'tertiary-container': '#FBBC04',
+        'on-tertiary': '#202124',
         'error-container': '#ffdad6',
         'warning': '#8a6100',
         'on-warning-container': '#2b1b00',
       },
       boxShadow: {
-        soft: '0 2px 8px rgb(52 54 111 / 8%)',
+        soft: '0 2px 8px rgb(66 133 244 / 12%)',
       },
       spacing: {
         gutter: '1.5rem',
