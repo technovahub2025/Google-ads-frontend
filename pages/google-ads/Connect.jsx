@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 import GoogleAdsLogo from '../../components/google-ads/GoogleAdsLogo.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
 
 export default function Connect() {
-  const { connect, error, isLoading, isConnecting, isMockMode } = useGoogleAds()
+  const { connect, error, isLoading, isConnecting, isMockMode, isConnected, connectionId } = useGoogleAds()
   const [showToast, setShowToast] = useState(false)
 
   const handleConnect = async () => {
@@ -26,6 +26,10 @@ export default function Connect() {
         </div>
       </div>
     )
+  }
+
+  if (isConnected && connectionId) {
+    return <Navigate to="/google-ads" replace />
   }
 
   return (
