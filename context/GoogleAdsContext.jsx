@@ -6,6 +6,7 @@ const GoogleAdsContext = createContext()
 
 export function GoogleAdsProvider({ children }) {
   const [isConnected, setIsConnected] = useState(MOCK_MODE)
+  const [connectionId, setConnectionId] = useState(null)
   const [account, setAccount] = useState(MOCK_MODE ? MOCK_ACCOUNT : null)
   const [isLoading, setIsLoading] = useState(!MOCK_MODE)
   const [error, setError] = useState(null)
@@ -14,6 +15,7 @@ export function GoogleAdsProvider({ children }) {
   const checkConnection = useCallback(async () => {
     if (MOCK_MODE) {
       setIsConnected(true)
+      setConnectionId(null)
       setAccount(MOCK_ACCOUNT)
       setError(null)
       setIsLoading(false)
@@ -24,10 +26,13 @@ export function GoogleAdsProvider({ children }) {
     try {
       const result = await googleAdsApi.checkConnection()
       const connected = result?.connected === true
+      const activeConnection = result?.connections?.find((item) => item.connected)
       setIsConnected(connected)
+      setConnectionId(activeConnection?.connectionId || result?.connectionId || null)
       setAccount(result?.account || null)
     } catch (err) {
       setIsConnected(false)
+      setConnectionId(null)
       setAccount(null)
       setError(err.message || 'Unable to check Google Ads connection.')
     } finally {
@@ -67,6 +72,7 @@ export function GoogleAdsProvider({ children }) {
       console.error('Disconnect error (proceeding with local cleanup):', err.message)
     } finally {
       setIsConnected(false)
+      setConnectionId(null)
       setAccount(null)
       setIsLoading(false)
     }
@@ -87,6 +93,7 @@ export function GoogleAdsProvider({ children }) {
     <GoogleAdsContext.Provider
       value={{
         isConnected,
+        connectionId,
         isMockMode: MOCK_MODE,
         account,
         isLoading,

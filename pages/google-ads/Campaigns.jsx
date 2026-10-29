@@ -1,5 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { googleAdsApi } from '../../services/googleAdsApi.js'
+import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
+import CampaignCreationWizard from '../../components/google-ads/CampaignCreationWizard.jsx'
+import { MOCK_MODE } from '../../config/googleAdsConfig.js'
 import ConfirmDialog from '../../components/google-ads/ConfirmDialog.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
 import { formatCurrency, formatNumber } from '../../utils/format.js'
@@ -17,6 +20,9 @@ const TYPE_OPTIONS = [
   { value: 'Display', label: 'Display' },
   { value: 'Shopping', label: 'Shopping' },
   { value: 'Performance Max', label: 'Performance Max' },
+  { value: 'Video', label: 'Video' },
+  { value: 'App', label: 'App' },
+  { value: 'Demand Gen', label: 'Demand Gen' },
 ]
 
 const statusColors = {
@@ -31,8 +37,42 @@ const statusLabels = {
   removed: 'Removed',
 }
 
+const normalizeCampaign = (row) => {
+  const campaign = row.campaign || row
+  const status = String(campaign.status || row.status || '').toLowerCase()
+  const channel = String(campaign.advertising_channel_type || campaign.advertisingChannelType || campaign.type || '')
+  const types = {
+    SEARCH: 'Search',
+    DISPLAY: 'Display',
+    SHOPPING: 'Shopping',
+    PERFORMANCE_MAX: 'Performance Max',
+    VIDEO: 'Video',
+    MULTI_CHANNEL: 'App',
+    DEMAND_GEN: 'Demand Gen',
+  }
+  return {
+    id: String(campaign.id || row.id || campaign.resource_name || campaign.resourceName || campaign.name),
+    name: campaign.name || row.name || 'Unnamed campaign',
+    type: types[channel.toUpperCase()] || channel,
+    status: ['enabled', 'paused', 'removed'].includes(status) ? status : status.toLowerCase(),
+    biddingStrategy: campaign.bidding_strategy_type || campaign.biddingStrategyType || row.biddingStrategy || '—',
+    dailyBudget: Number(campaign.budget_amount_micros || campaign.budgetAmountMicros || 0) / 1_000_000,
+    impressions: Number(row.metrics?.impressions || 0),
+    clicks: Number(row.metrics?.clicks || 0),
+    ctr: Number(row.metrics?.ctr || 0),
+    cpc: Number(row.metrics?.average_cpc || 0) / 1_000_000,
+    conversions: Number(row.metrics?.conversions || 0),
+    cost: Number(row.metrics?.cost_micros || 0) / 1_000_000,
+  }
+}
+
 export default function Campaigns() {
+  const { connectionId, isConnected, isLoading: connectionLoading } = useGoogleAds()
   const [campaigns, setCampaigns] = useState([])
+  const [accounts, setAccounts] = useState([])
+  const [accountsLoading, setAccountsLoading] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
+  const [selectedCustomerId, setSelectedCustomerId] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
@@ -43,24 +83,72 @@ export default function Campaigns() {
   const [toastMsg, setToastMsg] = useState('')
   const [toastType, setToastType] = useState('info')
 
+  const loadCampaigns = useCallback(async (customerId) => {
+    if (MOCK_MODE) {
+      const response = await googleAdsApi.getCampaigns()
+      setCampaigns(response.data || [])
+      return
+    }
+    if (!connectionId || !customerId) {
+      setCampaigns([])
+      return
+    }
+    const response = await googleAdsApi.getCustomerCampaigns(connectionId, customerId)
+    setCampaigns((response.campaigns || []).map(normalizeCampaign))
+  }, [connectionId])
+
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const res = await googleAdsApi.getCampaigns()
-        setCampaigns(res.data || [])
-      } catch (err) {
-        setError(err.message || 'Failed to load campaigns')
-      } finally {
+    if (connectionLoading) return
+    let active = true
+
+    const fetchAccountsAndCampaigns = async () => {
+      if (!isConnected || !connectionId) {
+        if (MOCK_MODE) {
+          const response = await googleAdsApi.getCampaigns()
+          if (active) setCampaigns(response.data || [])
+        } else {
+          setCampaigns([])
+        }
+        setAccounts([])
         setLoading(false)
+        return
+      }
+
+      setAccountsLoading(true)
+      setLoading(true)
+      setError(null)
+      try {
+        const response = await googleAdsApi.getCustomerAccounts(connectionId)
+        const customerAccounts = response.accounts || []
+        if (!active) return
+        setAccounts(customerAccounts)
+        const first = customerAccounts[0]
+        const selectedId = String(first?.customer_client?.id ?? first?.customerClient?.id ?? first?.id ?? '')
+        setSelectedCustomerId(selectedId)
+        if (selectedId) {
+          const campaignsResponse = await googleAdsApi.getCustomerCampaigns(connectionId, selectedId)
+          if (active) setCampaigns((campaignsResponse.campaigns || []).map(normalizeCampaign))
+        } else {
+          setCampaigns([])
+        }
+      } catch (err) {
+        if (active) setError(err.message || 'Failed to load Google Ads campaigns and customer accounts.')
+      } finally {
+        if (active) {
+          setAccountsLoading(false)
+          setLoading(false)
+        }
       }
     }
-    fetchCampaigns()
-  }, [])
+
+    fetchAccountsAndCampaigns()
+    return () => { active = false }
+  }, [connectionId, isConnected, connectionLoading])
 
   const filtered = useMemo(() => {
     return campaigns.filter((c) => {
-      const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.type.toLowerCase().includes(search.toLowerCase())
+      const matchesSearch = (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (c.type || '').toLowerCase().includes(search.toLowerCase())
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter
       const matchesType = typeFilter === 'all' || c.type === typeFilter
       return matchesSearch && matchesStatus && matchesType
@@ -110,9 +198,37 @@ export default function Campaigns() {
     setConfirmAction(null)
   }
 
-  const handleCreate = () => {
-    setToastMsg('Campaign creation form coming soon.')
-    setToastType('info')
+  const handleCreate = async () => {
+    if (!isConnected || !connectionId) {
+      setToastMsg('Connect a Google Ads account before creating a campaign.')
+      setToastType('error')
+      setShowToast(true)
+      return
+    }
+    if (accounts.length === 0 && !accountsLoading) {
+      setAccountsLoading(true)
+      try {
+        const response = await googleAdsApi.getCustomerAccounts(connectionId)
+        setAccounts(response.accounts || [])
+      } catch (err) {
+        setError(err.message || 'Failed to load Google Ads customer accounts.')
+        return
+      } finally {
+        setAccountsLoading(false)
+      }
+    }
+    setWizardOpen(true)
+  }
+
+  const handleCampaignCreated = async (customerId) => {
+    setSelectedCustomerId(customerId)
+    try {
+      await loadCampaigns(customerId)
+    } catch (err) {
+      setError(`Campaign was created, but the list could not be refreshed: ${err.message || 'request failed'}`)
+    }
+    setToastMsg('Campaign created successfully.')
+    setToastType('success')
     setShowToast(true)
   }
 
@@ -122,12 +238,23 @@ export default function Campaigns() {
         <h2 className="font-headline-md text-headline-md text-primary">Campaigns</h2>
         <button
           onClick={handleCreate}
+          disabled={connectionLoading || accountsLoading}
           className="flex items-center gap-2 bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors shadow-sm"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Create Campaign
         </button>
       </div>
+
+      {error && <div role="alert" className="rounded-lg border border-error bg-error-container px-4 py-3 text-sm text-on-error">{error}</div>}
+      {!connectionLoading && isConnected && accounts.length > 1 && (
+        <label className="flex items-center gap-3 text-sm text-on-surface-variant">
+          Customer account
+          <select value={selectedCustomerId} onChange={async (event) => { const customerId = event.target.value; setSelectedCustomerId(customerId); setLoading(true); try { await loadCampaigns(customerId) } catch (err) { setError(err.message || 'Failed to load campaigns.') } finally { setLoading(false) } }} className="rounded-lg border border-surface-variant bg-surface-container-low px-3 py-2 text-on-surface">
+            {accounts.map((raw) => { const account = raw.customer_client || raw.customerClient || raw; const id = String(account.id ?? raw.id ?? ''); return <option key={id} value={id}>{account.descriptive_name || account.descriptiveName || account.name || id}</option> })}
+          </select>
+        </label>
+      )}
 
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
@@ -265,6 +392,16 @@ export default function Campaigns() {
           message={toastMsg}
           type={toastType}
           onClose={() => setShowToast(false)}
+        />
+      )}
+
+      {wizardOpen && (
+        <CampaignCreationWizard
+          connectionId={connectionId}
+          accounts={accounts}
+          accountsLoading={accountsLoading}
+          onClose={() => setWizardOpen(false)}
+          onCreated={handleCampaignCreated}
         />
       )}
     </div>

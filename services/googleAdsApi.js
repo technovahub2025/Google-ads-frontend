@@ -106,6 +106,26 @@ export const googleAdsApi = {
     }
   },
 
+  getCustomerAccounts: async (connectionId) => {
+    if (!connectionId) throw new Error('A Google Ads connection is required to load customer accounts.')
+    return googleAdsFetch(`/api/google-ads/customer-accounts?connectionId=${encodeURIComponent(connectionId)}`)
+  },
+
+  getCustomerCampaigns: async (connectionId, customerId) => {
+    if (!connectionId || !customerId) {
+      throw new Error('A Google Ads connection and customer account are required to load campaigns.')
+    }
+    return googleAdsFetch(`/api/google-ads/campaigns?connectionId=${encodeURIComponent(connectionId)}&customerId=${encodeURIComponent(customerId)}`)
+  },
+
+  createCampaign: async (campaignConfiguration) => {
+    if (MOCK_MODE) throw new Error('Campaign creation requires a live Google Ads connection.')
+    return googleAdsFetch('/api/google-ads/campaigns', {
+      method: 'POST',
+      body: JSON.stringify(campaignConfiguration),
+    })
+  },
+
   getAdGroups: async () => {
     if (MOCK_MODE) return { data: mockAdGroups }
     try {
