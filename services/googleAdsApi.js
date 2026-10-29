@@ -9,7 +9,7 @@ import {
   mockBudgets,
   mockReports,
 } from '../data/googleAdsMockData.js'
-import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE, NEXION_USER_ID } from '../config/googleAdsConfig.js'
+import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE } from '../config/googleAdsConfig.js'
 
 async function googleAdsFetch(endpoint, options = {}) {
   if (!GOOGLE_ADS_BACKEND) {
@@ -49,16 +49,14 @@ export const googleAdsApi = {
 
   getAuthUrl: async () => {
     if (MOCK_MODE) return { success: true, mock: true, authUrl: null, message: 'Mock mode is enabled; no Google OAuth request was made.' }
-    if (!NEXION_USER_ID) throw new Error('Set VITE_NEXION_USER_ID to the logged-in Nexion user ID.')
-    const data = await googleAdsFetch(`/api/google-ads/auth?userId=${encodeURIComponent(NEXION_USER_ID)}`)
+    const data = await googleAdsFetch('/api/google-ads/auth')
     return data
   },
 
   checkConnection: async () => {
     if (MOCK_MODE) return { connected: true, account: MOCK_ACCOUNT, mock: true }
-    if (!NEXION_USER_ID) throw new Error('Set VITE_NEXION_USER_ID to the logged-in Nexion user ID.')
     try {
-      return await googleAdsFetch(`/api/google-ads/connection?userId=${encodeURIComponent(NEXION_USER_ID)}`)
+      return await googleAdsFetch('/api/google-ads/connection')
     } catch (error) {
       if (error.status === 404) return { success: true, connected: false }
       throw error
@@ -170,4 +168,4 @@ export const googleAdsApi = {
   },
 }
 
-export { GOOGLE_ADS_BACKEND, MOCK_MODE, NEXION_USER_ID }
+export { GOOGLE_ADS_BACKEND, MOCK_MODE }
