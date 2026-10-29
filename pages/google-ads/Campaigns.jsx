@@ -84,7 +84,7 @@ export default function Campaigns() {
   const [toastType, setToastType] = useState('info')
 
   const loadCampaigns = useCallback(async (customerId) => {
-    if (MOCK_MODE) {
+    if (MOCK_MODE && !connectionId) {
       const response = await googleAdsApi.getCampaigns()
       setCampaigns(response.data || [])
       return

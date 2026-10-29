@@ -48,13 +48,13 @@ export const googleAdsApi = {
      ============================================ */
 
   getAuthUrl: async () => {
-    if (MOCK_MODE) return { success: true, mock: true, authUrl: null, message: 'Mock mode is enabled; no Google OAuth request was made.' }
+    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) return { success: true, mock: true, authUrl: null, message: 'Mock mode is enabled; no Google OAuth request was made.' }
     const data = await googleAdsFetch('/api/google-ads/auth')
     return data
   },
 
   checkConnection: async () => {
-    if (MOCK_MODE) return { connected: true, account: MOCK_ACCOUNT, mock: true }
+    if (MOCK_MODE && !GOOGLE_ADS_BACKEND) return { connected: true, account: MOCK_ACCOUNT, mock: true }
     try {
       return await googleAdsFetch('/api/google-ads/connection')
     } catch (error) {
@@ -119,7 +119,6 @@ export const googleAdsApi = {
   },
 
   createCampaign: async (campaignConfiguration) => {
-    if (MOCK_MODE) throw new Error('Campaign creation requires a live Google Ads connection.')
     return googleAdsFetch('/api/google-ads/campaigns', {
       method: 'POST',
       body: JSON.stringify(campaignConfiguration),
