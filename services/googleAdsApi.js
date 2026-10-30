@@ -11,18 +11,36 @@ import {
 } from '../data/googleAdsMockData.js'
 import { GOOGLE_ADS_BACKEND, MOCK_ACCOUNT, MOCK_MODE } from '../config/googleAdsConfig.js'
 
+export function getNexionRole() {
+  try {
+    for (const key of ['user', 'nexionUser', 'currentUser']) {
+      const raw = window.localStorage.getItem(key) || window.sessionStorage.getItem(key)
+      if (raw) {
+        const user = JSON.parse(raw)
+        if (user.role) return String(user.role).toLowerCase()
+      }
+    }
+    const key = import.meta.env.VITE_TOKEN_KEY || 'authToken'
+    const token = window.localStorage.getItem(key) || window.sessionStorage.getItem(key) || window.localStorage.getItem('token') || window.sessionStorage.getItem('token')
+    const payload = token?.split('.')[1]
+    if (payload) return String(JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))).role || '').toLowerCase()
+  } catch { /* role is only used to shape the UI; backend authorization remains authoritative */ }
+  return ''
+}
+
 async function googleAdsFetch(endpoint, options = {}) {
   if (!GOOGLE_ADS_BACKEND) {
     throw new Error('Set VITE_GOOGLE_ADS_API_URL to the Google Ads backend URL.')
   }
 
   const url = `${GOOGLE_ADS_BACKEND}${endpoint}`
+  const storageKey = import.meta.env.VITE_TOKEN_KEY || 'authToken'
+  const token = window.localStorage.getItem(storageKey) || window.sessionStorage.getItem(storageKey) || window.localStorage.getItem('authToken') || window.localStorage.getItem('token') || window.sessionStorage.getItem('token')
+  const headers = { 'Content-Type': 'application/json', ...options.headers }
+  if (token) headers.Authorization = `Bearer ${token}`
   const res = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   })
 
   let data = null
@@ -111,6 +129,12 @@ export const googleAdsApi = {
     if (!connectionId) throw new Error('A Google Ads connection is required to load customer accounts.')
     return googleAdsFetch(`/api/google-ads/customer-accounts?connectionId=${encodeURIComponent(connectionId)}`)
   },
+
+  getCustomerAssignments: async () => googleAdsFetch('/api/google-ads/customer-assignments'),
+
+  assignCustomerAccount: async ({ userId, connectionId, customerId }) => googleAdsFetch('/api/google-ads/customer-assignments', {
+    method: 'POST', body: JSON.stringify({ userId, connectionId, customerId }),
+  }),
 
   getCustomerCampaigns: async (connectionId, customerId) => {
     if (MOCK_MODE) return { success: true, campaigns: mockCampaigns }

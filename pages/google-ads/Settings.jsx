@@ -1,13 +1,39 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
+import { googleAdsApi, getNexionRole } from '../../services/googleAdsApi.js'
 import ConfirmDialog from '../../components/google-ads/ConfirmDialog.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
 import { GOOGLE_ADS_BACKEND } from '../../config/googleAdsConfig.js'
 
 export default function Settings() {
-  const { isConnected, account, disconnect, isLoading } = useGoogleAds()
+  const { isConnected, account, disconnect, isLoading, connectionId } = useGoogleAds()
+  const isSuperAdmin = getNexionRole() === 'superadmin'
+  const [assignments, setAssignments] = useState([])
+  const [assignmentUserId, setAssignmentUserId] = useState('')
+  const [assignmentCustomerId, setAssignmentCustomerId] = useState('')
+  const [assignmentError, setAssignmentError] = useState('')
+  const [assignmentSaved, setAssignmentSaved] = useState(false)
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false)
   const [showToast, setShowToast] = useState(false)
+
+  useEffect(() => {
+    if (!isSuperAdmin) return
+    googleAdsApi.getCustomerAssignments().then((result) => setAssignments(result.assignments || [])).catch((err) => setAssignmentError(err.message || 'Unable to load customer assignments.'))
+  }, [isSuperAdmin])
+
+  const saveAssignment = async (event) => {
+    event.preventDefault()
+    setAssignmentError('')
+    setAssignmentSaved(false)
+    try {
+      await googleAdsApi.assignCustomerAccount({ userId: assignmentUserId.trim(), connectionId, customerId: assignmentCustomerId.trim() })
+      const result = await googleAdsApi.getCustomerAssignments()
+      setAssignments(result.assignments || [])
+      setAssignmentUserId('')
+      setAssignmentCustomerId('')
+      setAssignmentSaved(true)
+    } catch (err) { setAssignmentError(err.message || 'Unable to save this assignment.') }
+  }
 
   const handleDisconnect = async () => {
     try {
@@ -107,6 +133,25 @@ export default function Settings() {
           )}
         </div>
       </div>
+
+      {isSuperAdmin && (
+        <section className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft p-6 space-y-4">
+          <div>
+            <h3 className="font-headline-sm text-headline-sm text-primary">Customer assignments</h3>
+            <p className="mt-1 text-sm text-on-surface-variant">Assign one accessible Google Ads customer account to a Nexion user.</p>
+          </div>
+          <form onSubmit={saveAssignment} className="grid gap-3 sm:grid-cols-3">
+            <input required value={assignmentUserId} onChange={(e) => setAssignmentUserId(e.target.value)} placeholder="Nexion user ID" aria-label="Nexion user ID" className="rounded-lg border border-surface-variant bg-surface px-3 py-2" />
+            <input required value={connectionId || ''} readOnly placeholder="Manager connection" aria-label="Manager connection" className="rounded-lg border border-surface-variant bg-surface px-3 py-2" />
+            <div className="flex gap-2"><input required value={assignmentCustomerId} onChange={(e) => setAssignmentCustomerId(e.target.value)} placeholder="Google Ads customer ID" aria-label="Google Ads customer ID" className="min-w-0 flex-1 rounded-lg border border-surface-variant bg-surface px-3 py-2" /><button disabled={!connectionId} className="rounded-lg bg-primary px-4 py-2 text-on-primary disabled:opacity-50">Assign</button></div>
+          </form>
+          {assignmentError && <p role="alert" className="text-sm text-error">{assignmentError}</p>}
+          {assignmentSaved && <p role="status" className="text-sm text-google-ads-green">Customer assignment saved.</p>}
+          <ul className="divide-y divide-surface-variant text-sm">
+            {assignments.map((item) => <li key={item.userId} className="flex flex-wrap justify-between gap-2 py-2"><span>Nexion user {item.userId}</span><span>Customer {item.customerId}</span></li>)}
+          </ul>
+        </section>
+      )}
 
       <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft p-6">
         <h3 className="font-headline-sm text-headline-sm text-primary mb-4 flex items-center gap-2">

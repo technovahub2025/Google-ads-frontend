@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { getNexionRole } from '../../services/googleAdsApi.js'
 
 const navItems = [
   { label: 'Overview', icon: 'dashboard', href: '/google-ads' },
@@ -13,6 +14,8 @@ const navItems = [
 ]
 
 export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
+  const role = getNexionRole()
+  const visibleItems = role === 'superadmin' ? navItems : navItems.filter((item) => item.label !== 'Settings')
   return (
     <>
       {sidebarOpen && (
@@ -42,7 +45,7 @@ export default function GoogleAdsSidebar({ sidebarOpen, setSidebarOpen }) {
         </div>
 
         <div className="flex-1 space-y-1 overflow-y-auto pr-2">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <NavLink
               key={item.label}
               to={item.href}
