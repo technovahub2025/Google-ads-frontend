@@ -34,13 +34,13 @@ export default function Toast({ message, type = 'info', duration = 4000, onClose
         }`}
       >
         <span className="material-symbols-outlined text-[20px]">{icons[type]}</span>
-        <span className="min-w-0 break-words font-body-md text-body-md">{message}</span>
+        <span className="min-w-0 break-words text-sm leading-6">{message}</span>
         <button
           onClick={() => {
             setVisible(false)
             setTimeout(() => onClose?.(), 300)
           }}
-          className="ml-2 hover:text-on-surface transition-colors"
+          className="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-md hover:bg-black/5 motion-safe:transition-colors"
           aria-label="Close"
         >
           <span className="material-symbols-outlined text-[18px]">close</span>

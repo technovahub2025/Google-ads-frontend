@@ -3,10 +3,12 @@ import { Link, Navigate } from 'react-router-dom'
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
 import GoogleAdsLogo from '../../components/google-ads/GoogleAdsLogo.jsx'
 import Toast from '../../components/google-ads/Toast.jsx'
+import { getNexionRole } from '../../services/googleAdsApi.js'
 
 export default function Connect() {
   const { connect, error, isLoading, isConnecting, isMockMode, isConnected, connectionId } = useGoogleAds()
   const [showToast, setShowToast] = useState(false)
+  const canInitiateOAuth = getNexionRole() === 'superadmin' || isMockMode
 
   const handleConnect = async () => {
     try {
@@ -33,41 +35,47 @@ export default function Connect() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface py-12 px-4">
+    <div className="ads-page flex items-center justify-center">
       <div className="max-w-md w-full">
-        <div className="bg-surface-container-lowest border border-surface-variant rounded-2xl shadow-soft p-10 text-center">
+        <div className="ads-card ads-card-padding text-center sm:p-8">
           <div className="flex justify-center mb-6">
             <GoogleAdsLogo variant="icon" className="w-16 h-16" />
           </div>
 
-          <h1 className="font-headline-lg text-headline-lg text-primary mb-4">
+          <h1 className="ads-page-title mb-3">
             Connect Google Ads
           </h1>
 
-          <p className="font-body-md text-body-md text-on-surface-variant mb-8 leading-relaxed">
+          <p className="ads-description mb-5">
             Connect your Google Ads account to manage campaigns, budgets, ads, and
             performance from Nexion.
           </p>
 
           {error && (
-            <div className="mb-6 p-4 bg-error-container border border-error text-on-error rounded-lg font-body-md text-body-md">
+            <div className="mb-6 p-4 bg-error-container border border-error text-error rounded-lg font-body-md text-body-md">
               {error}
             </div>
           )}
 
-          <button
-            onClick={handleConnect}
-            disabled={isConnecting}
-            className="w-full flex items-center justify-center gap-3 bg-google-ads-blue text-white font-label-md text-label-md py-3 px-6 rounded-xl hover:bg-google-ads-blue/90 transition-all duration-200 shadow-sm"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M10 1C5.58 1 2 4.58 2 9c0 3.99 3.13 7.31 7.14 7.9V13l-2.07-2.07.01-.01A6 6 0 0111.83 5.5c1.34 2.03 1.3 4.68-.1 6.36L9 15l2.95 2.95A7.96 7.96 0 0017 9c0-3.87-3.13-7-7-7z"
-                fill="currentColor"
-              />
-            </svg>
-            {isConnecting ? 'Connecting...' : isMockMode ? 'Open Demo Dashboard' : 'Connect Google Ads'}
-          </button>
+          {canInitiateOAuth ? (
+            <button
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="ads-button ads-button--primary w-full"
+           >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M10 1C5.58 1 2 4.58 2 9c0 3.99 3.13 7.31 7.14 7.9V13l-2.07-2.07.01-.01A6 6 0 0111.83 5.5c1.34 2.03 1.3 4.68-.1 6.36L9 15l2.95 2.95A7.96 7.96 0 0017 9c0-3.87-3.13-7-7-7z"
+                  fill="currentColor"
+                />
+              </svg>
+              {isConnecting ? 'Connecting...' : isMockMode ? 'Open Demo Dashboard' : 'Connect Google Ads'}
+            </button>
+          ) : (
+            <p role="status" className="rounded-lg bg-surface-container-low p-4 text-sm text-on-surface-variant">
+              Google Ads access has not been assigned to your account. Please contact your Super Admin.
+            </p>
+          )}
 
           <p className="font-label-sm text-label-sm text-on-surface-variant mt-4">
             {isMockMode
@@ -81,7 +89,7 @@ export default function Connect() {
           <Link
             to="/"
             className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors"
-          >
+         >
             ← Back to Nexion Home
           </Link>
         </div>

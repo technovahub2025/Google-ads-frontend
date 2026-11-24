@@ -5,6 +5,10 @@ import DateRangeSelector from '../../components/google-ads/DateRangeSelector.jsx
 import Toast from '../../components/google-ads/Toast.jsx'
 import { formatCurrency, formatNumber } from '../../utils/format.js'
 import { mockReports, mockTimeSeriesData } from '../../data/googleAdsMockData.js'
+import * as cacheModule from '../../services/googleAdsCache.js'
+const readGoogleAdsCache = (...args) => cacheModule.readGoogleAdsCache?.(...args)
+const writeGoogleAdsCache = (...args) => cacheModule.writeGoogleAdsCache?.(...args)
+import { useGoogleAdsAccount } from '../../context/GoogleAdsAccountContext.jsx'
 
 function exportToCSV(rows, filename) {
   if (!rows || rows.length === 0) return
@@ -60,13 +64,18 @@ export default function Reports() {
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState('last_30_days')
   const [showToast, setShowToast] = useState(false)
+  const { selected } = useGoogleAdsAccount()
+  const cacheKey = `page:reports:${selected?.key || 'none'}:${dateRange}`
 
   useEffect(() => {
     const fetchReports = async () => {
-      setLoading(true)
+      const cached = readGoogleAdsCache(cacheKey)
+      if (cached) { setReports(cached); setLoading(false) }
+      else setLoading(true)
       try {
-        const res = await googleAdsApi.getReports(dateRange)
-        setReports(res.data || mockReports)
+        const res = await googleAdsApi.getReports(dateRange, selected)
+        const next = res.data || mockReports
+        writeGoogleAdsCache(cacheKey, next); setReports(next)
       } catch (err) {
         console.error(err)
         setReports(mockReports)
@@ -75,7 +84,7 @@ export default function Reports() {
       }
     }
     fetchReports()
-  }, [dateRange])
+  }, [dateRange, selected])
 
   const summaryRows = useMemo(() => {
     if (!reports?.performanceSummary) return []
@@ -117,7 +126,7 @@ export default function Reports() {
 
   if (loading) {
     return (
-      <div className="space-y-stack-lg">
+      <div className="ads-stack">
         <div className="h-8 bg-surface-container-low rounded w-1/4 animate-pulse"></div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
           {[...Array(2)].map((_, i) => (
@@ -131,21 +140,21 @@ export default function Reports() {
   const dr = reports?.dateRange || { start: '2025-09-01', end: '2025-09-30' }
 
   return (
-    <div className="space-y-stack-lg">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <h2 className="font-headline-md text-headline-md text-primary">Reports</h2>
-        <div className="flex items-center gap-3 flex-wrap">
+    <div className="ads-stack">
+      <div className="ads-toolbar">
+        <h2 className="ads-page-title">Reports</h2>
+        <div className="ads-actions">
           <DateRangeSelector value={dateRange} onChange={setDateRange} />
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-google-ads-green text-white font-label-md text-label-md rounded-xl hover:bg-google-ads-green/90 transition-colors"
+            className="ads-button"
           >
             <span className="material-symbols-outlined text-[18px]">file_download</span>
             Export CSV
           </button>
           <button
             onClick={handleExportExcel}
-            className="flex items-center gap-2 px-4 py-2 bg-google-ads-blue text-white font-label-md text-label-md rounded-xl hover:bg-google-ads-blue/90 transition-colors"
+            className="ads-button ads-button--primary"
           >
             <span className="material-symbols-outlined text-[18px]">file_download</span>
             Export Excel
@@ -158,28 +167,28 @@ export default function Reports() {
         Showing data from {dr.start} to {dr.end}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-        <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft">
-          <h3 className="font-label-md text-label-md text-on-surface-variant mb-2">Total Spend</h3>
-          <p className="font-headline-md text-headline-md text-primary font-semibold">
+      <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 lg:grid-cols-4">
+        <div className="ads-card ads-card-padding break-words tabular-nums">
+          <h3 className="ads-metric-label mb-2">Total Spend</h3>
+          <p className="ads-metric-value">
             {formatCurrency(reports?.performanceSummary?.reduce((sum, r) => sum + r.spend, 0) || 0)}
           </p>
         </div>
-        <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft">
-          <h3 className="font-label-md text-label-md text-on-surface-variant mb-2">Total Clicks</h3>
-          <p className="font-headline-md text-headline-md text-primary font-semibold">
+        <div className="ads-card ads-card-padding break-words tabular-nums">
+          <h3 className="ads-metric-label mb-2">Total Clicks</h3>
+          <p className="ads-metric-value">
             {formatNumber(reports?.performanceSummary?.reduce((sum, r) => sum + r.clicks, 0) || 0)}
           </p>
         </div>
-        <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft">
-          <h3 className="font-label-md text-label-md text-on-surface-variant mb-2">Total Impressions</h3>
-          <p className="font-headline-md text-headline-md text-primary font-semibold">
+        <div className="ads-card ads-card-padding break-words tabular-nums">
+          <h3 className="ads-metric-label mb-2">Total Impressions</h3>
+          <p className="ads-metric-value">
             {formatNumber(reports?.performanceSummary?.reduce((sum, r) => sum + r.impressions, 0) || 0)}
           </p>
         </div>
-        <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft">
-          <h3 className="font-label-md text-label-md text-on-surface-variant mb-2">Total Conversions</h3>
-          <p className="font-headline-md text-headline-md text-primary font-semibold">
+        <div className="ads-card ads-card-padding break-words tabular-nums">
+          <h3 className="ads-metric-label mb-2">Total Conversions</h3>
+          <p className="ads-metric-value">
             {formatNumber(reports?.performanceSummary?.reduce((sum, r) => sum + r.conversions, 0) || 0)}
           </p>
         </div>
@@ -211,24 +220,24 @@ export default function Reports() {
         loading={false}
       />
 
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft overflow-hidden">
-        <div className="p-4 border-b border-surface-variant">
-          <h3 className="font-headline-sm text-headline-sm text-primary">Campaign Performance</h3>
+      <div className="ads-card">
+        <div className="ads-card-header">
+          <h3 className="ads-section-title">Campaign Performance</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="ads-table-scroll" tabIndex={0} role="region" aria-label="Campaign performance">
+          <table className="ads-table min-w-[680px] tabular-nums">
             <thead>
-              <tr className="bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                <th className="px-4 py-3 font-medium">Campaign</th>
-                <th className="px-4 py-3 font-medium text-right">Impr.</th>
-                <th className="px-4 py-3 font-medium text-right">Clicks</th>
-                <th className="px-4 py-3 font-medium text-right">Conversions</th>
-                <th className="px-4 py-3 font-medium text-right">Spend</th>
-                <th className="px-4 py-3 font-medium text-right">CTR</th>
-                <th className="px-4 py-3 font-medium text-right">CPC</th>
+              <tr>
+                <th className="font-medium">Campaign</th>
+                <th className="ads-number">Impr.</th>
+                <th className="ads-number">Clicks</th>
+                <th className="ads-number">Conversions</th>
+                <th className="ads-number">Spend</th>
+                <th className="ads-number">CTR</th>
+                <th className="ads-number">CPC</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-variant font-body-md text-body-md">
+            <tbody>
               {campaignRows.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-4 py-8 text-center text-on-surface-variant">
@@ -237,14 +246,14 @@ export default function Reports() {
                 </tr>
               ) : (
                 campaignRows.map((row, i) => (
-                  <tr key={i} className="hover:bg-surface-container-low/50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-primary">{row.Campaign}</td>
-                    <td className="px-4 py-3 text-right">{row.Impressions}</td>
-                    <td className="px-4 py-3 text-right">{row.Clicks}</td>
-                    <td className="px-4 py-3 text-right">{row.Conversions}</td>
-                    <td className="px-4 py-3 text-right">{row.Spend}</td>
-                    <td className="px-4 py-3 text-right">{row.CTR}</td>
-                    <td className="px-4 py-3 text-right">{row.CPC}</td>
+                  <tr key={i}>
+                    <td className="font-medium text-blue-800">{row.Campaign}</td>
+                    <td className="ads-number">{row.Impressions}</td>
+                    <td className="ads-number">{row.Clicks}</td>
+                    <td className="ads-number">{row.Conversions}</td>
+                    <td className="ads-number">{row.Spend}</td>
+                    <td className="ads-number">{row.CTR}</td>
+                    <td className="ads-number">{row.CPC}</td>
                   </tr>
                 ))
               )}

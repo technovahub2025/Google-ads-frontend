@@ -63,12 +63,12 @@ export default {
         'label-sm': ['0.75rem', { lineHeight: '1rem' }],
       },
       fontFamily: {
-        'headline-lg': ['Inter', 'Arial', 'sans-serif'],
-        'headline-md': ['Inter', 'Arial', 'sans-serif'],
-        'headline-sm': ['Inter', 'Arial', 'sans-serif'],
-        'body-md': ['Inter', 'Arial', 'sans-serif'],
-        'label-md': ['Inter', 'Arial', 'sans-serif'],
-        'label-sm': ['Inter', 'Arial', 'sans-serif'],
+        'headline-lg': 'var(--ads-font-sans)',
+        'headline-md': 'var(--ads-font-sans)',
+        'headline-sm': 'var(--ads-font-sans)',
+        'body-md': 'var(--ads-font-sans)',
+        'label-md': 'var(--ads-font-sans)',
+        'label-sm': 'var(--ads-font-sans)',
       },
       borderWidth: {
         3: '3px',

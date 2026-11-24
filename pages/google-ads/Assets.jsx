@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { googleAdsApi } from '../../services/googleAdsApi.js'
 import { mockAssets } from '../../data/googleAdsMockData.js'
+import * as cacheModule from '../../services/googleAdsCache.js'
+const readGoogleAdsCache = (...args) => cacheModule.readGoogleAdsCache?.(...args)
+const writeGoogleAdsCache = (...args) => cacheModule.writeGoogleAdsCache?.(...args)
+import { useGoogleAdsAccount } from '../../context/GoogleAdsAccountContext.jsx'
 
 const TABS = [
   { id: 'images', label: 'Images', icon: 'image' },
@@ -20,36 +24,41 @@ export default function Assets() {
   const [assets, setAssets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('images')
+  const { selected } = useGoogleAdsAccount()
+  const cacheKey = `page:assets:${selected?.key || 'none'}`
 
   useEffect(() => {
     const fetchAssets = async () => {
+      const cached = readGoogleAdsCache(cacheKey)
+      if (cached) { setAssets(cached); setLoading(false) }
       try {
-        const res = await googleAdsApi.getAssets()
-        setAssets(res.data || mockAssets)
+        const res = await googleAdsApi.getAssets(selected)
+        const next = res.data || mockAssets
+        writeGoogleAdsCache(cacheKey, next); setAssets(next)
       } catch (err) {
         console.error(err)
-        setAssets(mockAssets)
+        if (!cached) setAssets(mockAssets)
       } finally {
         setLoading(false)
       }
     }
     fetchAssets()
-  }, [])
+  }, [cacheKey, selected])
 
   const currentData = assets?.[activeTab] || []
   const assetData = Array.isArray(currentData) ? currentData : []
 
   return (
-    <div className="space-y-stack-lg">
-      <h2 className="font-headline-md text-headline-md text-primary">Assets</h2>
+    <div className="ads-stack">
+      <h2 className="ads-page-title">Assets</h2>
 
       <div className="border-b border-surface-variant">
-        <nav className="flex flex-wrap -mb-px gap-2" role="tablist">
+        <nav className="ads-actions -mb-px" role="tablist">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 font-label-md text-label-md border-b-3 transition-all ${
+              className={`inline-flex min-h-10 items-center gap-2 rounded-t-md border-b-3 px-3 py-2 text-sm font-medium motion-safe:transition-colors ${
                 activeTab === tab.id
                   ? 'border-primary text-primary'
                   : 'border-transparent text-on-surface-variant hover:text-on-surface hover:border-surface-variant'
@@ -62,9 +71,9 @@ export default function Assets() {
         </nav>
       </div>
 
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft overflow-hidden">
-        <div className="p-4 border-b border-surface-variant flex justify-between items-center">
-          <h3 className="font-headline-sm text-headline-sm text-primary capitalize">{TABS.find((t) => t.id === activeTab)?.label} Assets</h3>
+      <div className="ads-card">
+        <div className="ads-card-header">
+          <h3 className="ads-section-title capitalize">{TABS.find((t) => t.id === activeTab)?.label} Assets</h3>
           <span className="font-label-sm text-label-sm text-on-surface-variant">
             {assetData.length} asset{assetData.length !== 1 ? 's' : ''}
           </span>
@@ -72,13 +81,13 @@ export default function Assets() {
 
         <div className="p-4">
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="bg-surface-container-low rounded-lg p-4 animate-pulse h-32"></div>
               ))}
             </div>
           ) : assetData.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="ads-description py-8 text-center">
               <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30 mb-3">
                 {TABS.find((t) => t.id === activeTab)?.icon}
               </span>
@@ -90,8 +99,8 @@ export default function Assets() {
             <div className="space-y-2">
               {assetData.map((a) => (
                 <div key={a.id} className="flex items-center justify-between p-3 border border-surface-variant rounded-lg hover:bg-surface-container-low transition-colors">
-                  <div className="flex-1">
-                    <p className="font-body-md text-body-md text-on-surface break-all">{a.text || a.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body-md text-body-md text-on-surface [overflow-wrap:anywhere]">{a.text || a.name}</p>
                     {a.assetType && (
                       <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{a.assetType}</p>
                     )}
@@ -103,7 +112,7 @@ export default function Assets() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {assetData.map((a) => (
                 <div key={a.id} className="border border-surface-variant rounded-lg overflow-hidden hover:shadow-soft transition-shadow">
                   <div className="aspect-video bg-surface-container-low flex items-center justify-center">
@@ -114,7 +123,7 @@ export default function Assets() {
                     )}
                   </div>
                   <div className="p-3">
-                    <p className="font-label-md text-label-md text-on-surface font-medium">{a.name}</p>
+                    <p className="break-words text-sm font-medium text-on-surface">{a.name}</p>
                     <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">
                       {a.width && a.height && `${a.width} × ${a.height}px`}
                       {a.type && ` • ${a.type}`}

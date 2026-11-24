@@ -10,7 +10,6 @@ import {
   Filler,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { useEffect } from 'react'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineController, LineElement, Tooltip, Legend, Filler)
 
@@ -86,16 +85,18 @@ export default function PerformanceChart({ title, labels, datasets, loading = fa
   }
 
   return (
-    <div className={`bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft ${height}`}>
+    <div className={`ads-card ads-card-padding flex flex-col ${height}`}>
       {title && (
-        <h3 className="font-headline-sm text-headline-sm text-primary mb-4">{title}</h3>
+        <h3 className="ads-section-title mb-3">{title}</h3>
       )}
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <Line data={chartData} options={options} />
+        <div className="relative min-h-0 min-w-0 flex-1">
+          <Line data={chartData} options={options} />
+        </div>
       )}
     </div>
   )

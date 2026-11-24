@@ -23,10 +23,10 @@ export default function StatCard({
       : 'text-on-surface-variant'
 
   return (
-    <div className="bg-surface-container-lowest border border-surface-variant rounded-xl p-5 shadow-soft transition-all group">
+    <div className="ads-card ads-card-padding">
       <div className="flex min-h-9 items-center justify-between gap-3 mb-3">
-        <h3 className="font-label-md text-label-md text-on-surface-variant">{title}</h3>
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${iconBg} ${iconColor}`}>
+        <h3 className="ads-metric-label">{title}</h3>
+        <div className={`size-9 shrink-0 rounded-lg flex items-center justify-center ${iconBg} ${iconColor}`}>
           <span className="material-symbols-outlined text-[20px]">{icon}</span>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default function StatCard({
         </div>
       ) : (
         <>
-          <p className="font-headline-md text-headline-md text-on-surface font-semibold mb-1 break-words tabular-nums">
+          <p className="ads-metric-value mb-1">
             {displayValue}
           </p>
           {subtitle && (

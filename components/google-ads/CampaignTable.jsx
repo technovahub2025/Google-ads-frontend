@@ -13,9 +13,9 @@ const statusLabels = {
   removed: 'Removed',
 }
 
-export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggle }) {
+export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggle, currency, readOnly = false }) {
   const columns = [
-    { key: 'name', label: 'Campaign Name', render: (val) => <span className="font-medium text-primary">{val}</span> },
+    { key: 'name', label: 'Campaign Name', render: (val) => <span className="font-medium text-blue-800">{val}</span> },
     {
       key: 'status',
       label: 'Status',
@@ -31,12 +31,15 @@ export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggl
     { key: 'ctr', label: 'CTR', render: (val) => `${val}%` },
     { key: 'cpc', label: 'CPC', render: (val) => formatCurrency(val) },
     { key: 'conversions', label: 'Conversions', render: (val) => formatNumber(val) },
+    { key: 'conversionValue', label: 'Conversion Value', render: (val) => formatCurrency(val) },
+    { key: 'cpa', label: 'CPA', render: (val) => formatCurrency(val) },
+    { key: 'roas', label: 'ROAS', render: (val) => `${Number(val || 0).toFixed(2)}x` },
     { key: 'cost', label: 'Spend', render: (val) => formatCurrency(val) },
   ]
 
   if (loading) {
     return (
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm overflow-hidden">
+      <div className="ads-card overflow-hidden">
         <div className="p-4 border-b border-surface-variant">
           <div className="h-6 bg-surface-container-low rounded w-1/3 animate-pulse"></div>
         </div>
@@ -55,7 +58,7 @@ export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggl
 
   if (!campaigns || campaigns.length === 0) {
     return (
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-sm p-12 text-center">
+      <div className="ads-card ads-card-padding text-center">
         <span className="material-symbols-outlined text-[48px] text-on-surface-variant/30 mb-3">campaign</span>
         <p className="font-body-md text-body-md text-on-surface-variant">No campaigns found. Create your first campaign to get started.</p>
       </div>
@@ -63,45 +66,48 @@ export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggl
   }
 
   return (
-    <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft overflow-hidden">
-      <div className="p-4 border-b border-surface-variant flex justify-between items-center">
-        <h3 className="font-headline-sm text-headline-sm text-primary">Campaign Performance</h3>
+    <div className="ads-card">
+      <div className="ads-card-header">
+        <h3 className="ads-section-title">Campaign Performance</h3>
         <span className="font-label-sm text-label-sm text-on-surface-variant">{campaigns.length} campaigns</span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="ads-table-scroll" tabIndex={0} role="region" aria-label="Campaign performance">
+        <table className="ads-table min-w-[1060px]">
           <thead>
-            <tr className="bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 font-medium text-left">{col.label}</th>
+                <th key={col.key} className={col.key === 'name' || col.key === 'status' ? undefined : 'ads-number'}>{col.label}</th>
               ))}
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
+              {!readOnly && <th className="text-right">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-variant font-body-md text-body-md">
+          <tbody className="tabular-nums">
             {campaigns.map((campaign) => (
-              <tr key={campaign.id} className="hover:bg-surface-container-low/50 transition-colors">
-                <td className="px-4 py-3">
-                  <span className="font-medium text-primary">{campaign.name}</span>
+              <tr key={campaign.id}>
+                <td className="min-w-40">
+                  <span className="font-medium text-blue-800">{campaign.name}</span>
                   <span className="ml-2 font-label-sm text-label-sm text-on-surface-variant">({campaign.type})</span>
                 </td>
-                <td className="px-4 py-3">
+                <td>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-label-sm text-label-sm border ${statusColors[campaign.status] || ''}`}>
                     {statusLabels[campaign.status] || campaign.status}
                   </span>
                 </td>
-                <td className="px-4 py-3">{formatCurrency(campaign.dailyBudget)}</td>
-                <td className="px-4 py-3">{formatNumber(campaign.impressions)}</td>
-                <td className="px-4 py-3">{formatNumber(campaign.clicks)}</td>
-                <td className="px-4 py-3">{campaign.ctr}%</td>
-                <td className="px-4 py-3">{formatCurrency(campaign.cpc)}</td>
-                <td className="px-4 py-3">{formatNumber(campaign.conversions)}</td>
-                <td className="px-4 py-3">{formatCurrency(campaign.cost)}</td>
-                <td className="px-4 py-3 text-right">
+                <td className="ads-number">{formatCurrency(campaign.dailyBudget, currency)}</td>
+                <td className="ads-number">{formatNumber(campaign.impressions)}</td>
+                <td className="ads-number">{formatNumber(campaign.clicks)}</td>
+                <td className="ads-number">{Number(campaign.ctr).toFixed(2)}%</td>
+                <td className="ads-number">{formatCurrency(campaign.cpc, currency)}</td>
+                <td className="ads-number">{formatNumber(campaign.conversions)}</td>
+                <td className="ads-number">{formatCurrency(campaign.conversionValue, currency)}</td>
+                <td className="ads-number">{formatCurrency(campaign.cpa, currency)}</td>
+                <td className="ads-number">{Number(campaign.roas || 0).toFixed(2)}x</td>
+                <td className="ads-number">{formatCurrency(campaign.cost, currency)}</td>
+                {!readOnly && <td className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onPauseToggle?.(campaign)}
-                      className="p-1 text-on-surface-variant hover:text-primary transition-colors"
+                      className="ads-button ads-button--compact"
                       aria-label={campaign.status === 'enabled' ? 'Pause' : 'Enable'}
                       title={campaign.status === 'enabled' ? 'Pause' : 'Enable'}
                     >
@@ -111,21 +117,21 @@ export default function CampaignTable({ campaigns, loading, onEdit, onPauseToggl
                     </button>
                     <button
                       onClick={() => onEdit?.(campaign)}
-                      className="p-1 text-on-surface-variant hover:text-primary transition-colors"
+                      className="ads-button ads-button--compact"
                       aria-label="Edit"
                       title="Edit"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                     </button>
                     <button
-                      className="p-1 text-on-surface-variant hover:text-primary transition-colors"
+                      className="ads-button ads-button--compact"
                       aria-label="More"
                       title="More actions"
                     >
                       <span className="material-symbols-outlined text-[18px]">more_vert</span>
                     </button>
                   </div>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

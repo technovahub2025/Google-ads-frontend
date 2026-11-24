@@ -1,7 +1,6 @@
 const env = import.meta.env
 
-// TEMPORARY: switch to false to re-enable the real Google Ads connection flow.
-export const GOOGLE_ADS_DEVELOPMENT_MODE = true
+export const GOOGLE_ADS_DEVELOPMENT_MODE = env.VITE_GOOGLE_ADS_DEVELOPMENT_MODE === 'true'
 export const MOCK_MODE = GOOGLE_ADS_DEVELOPMENT_MODE
 export const GOOGLE_ADS_BACKEND = env.VITE_GOOGLE_ADS_API_URL || ''
 

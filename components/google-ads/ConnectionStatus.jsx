@@ -1,7 +1,9 @@
 import { useGoogleAds } from '../../context/GoogleAdsContext.jsx'
+import { getNexionRole } from '../../services/googleAdsApi.js'
 
 export default function ConnectionStatus({ compact = false }) {
-  const { isConnected, account, isLoading, isConnecting, error, connect } = useGoogleAds()
+  const { isConnected, account, isSharedConnection, isLoading, isConnecting, error, connect } = useGoogleAds()
+  const canManageConnection = getNexionRole() === 'superadmin'
 
   if (isLoading) {
     return (
@@ -17,7 +19,7 @@ export default function ConnectionStatus({ compact = false }) {
       return (
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-google-ads-green"></span>
-          <span className="font-label-sm text-label-sm text-google-ads-green">Connected</span>
+          <span className="font-label-sm text-label-sm text-google-ads-green">{isSharedConnection ? 'Connected by Super Admin' : 'Connected'}</span>
         </div>
       )
     }
@@ -25,7 +27,7 @@ export default function ConnectionStatus({ compact = false }) {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-google-ads-green animate-pulse"></span>
-          <span className="font-body-md text-body-md text-google-ads-green">Connected</span>
+          <span className="font-body-md text-body-md text-google-ads-green">{isSharedConnection ? 'Connected by Super Admin' : 'Connected'}</span>
         </div>
         {account?.name && (
           <span className="font-label-md text-label-md text-on-surface-variant">
@@ -40,13 +42,13 @@ export default function ConnectionStatus({ compact = false }) {
     <div className="flex items-center gap-2 flex-wrap">
       <span className="w-2 h-2 rounded-full bg-error"></span>
       <span className={`text-error ${compact ? 'font-label-sm text-label-sm' : 'font-body-md'}`}>Not Connected</span>
-      <button
+      {canManageConnection ? <button
         onClick={connect}
         disabled={isConnecting}
-        className="ml-2 px-3 py-1 bg-primary text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-primary/90 transition-colors"
-      >
+        className="ads-button ads-button--primary ads-button--compact"
+     >
         {isConnecting ? 'Connecting...' : 'Connect'}
-      </button>
+      </button> : <span className="text-on-surface-variant">Managed by your Super Admin</span>}
       {error && <span role="alert" className="w-full text-sm text-error">{error}</span>}
     </div>
   )

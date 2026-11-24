@@ -6,7 +6,7 @@ import Toast from '../../components/google-ads/Toast.jsx'
 import { GOOGLE_ADS_BACKEND } from '../../config/googleAdsConfig.js'
 
 export default function Settings() {
-  const { isConnected, account, disconnect, isLoading, connectionId } = useGoogleAds()
+  const { isConnected, account, disconnect, isLoading, connectionId, connectionDetails, isSharedConnection } = useGoogleAds()
   const isSuperAdmin = getNexionRole() === 'superadmin'
   const [assignments, setAssignments] = useState([])
   const [assignmentUserId, setAssignmentUserId] = useState('')
@@ -49,27 +49,27 @@ export default function Settings() {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="font-body-md text-body-md text-on-surface-variant">Loading settings...</p>
+          <p className="min-w-0 text-sm leading-6 text-on-surface [overflow-wrap:anywhere]-variant">Loading settings...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-stack-lg max-w-3xl">
-      <h2 className="font-headline-md text-headline-md text-primary">Google Ads Settings</h2>
+    <div className="ads-stack max-w-5xl">
+      <h2 className="ads-page-title">Google Ads Settings</h2>
 
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft p-6">
-        <h3 className="font-headline-sm text-headline-sm text-primary mb-4 flex items-center gap-2">
+      <div className="ads-card ads-card-padding">
+        <h3 className="ads-section-title mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">cloud_sync</span>
           Google Ads Connection
         </h3>
 
-        <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg mb-4">
+        <div className="ads-toolbar p-4 bg-surface-container-low rounded-lg mb-4">
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-google-ads-green animate-pulse' : 'bg-error'}`}></div>
             <span className={`font-label-md text-label-md font-medium ${isConnected ? 'text-google-ads-green' : 'text-error'}`}>
-              {isConnected ? 'Connected' : 'Not Connected'}
+              {isConnected ? (isSharedConnection ? 'Connected by Super Admin' : 'Connected') : 'Not Connected'}
             </span>
           </div>
           <div
@@ -78,72 +78,89 @@ export default function Settings() {
                 ? 'bg-google-ads-green/10 text-google-ads-green'
                 : 'bg-error/10 text-error'
             }`}
-          >
+         >
             {isConnected ? 'Active' : 'Inactive'}
           </div>
         </div>
 
         {isConnected && account && (
           <div className="space-y-3 mb-6">
-            <div className="flex items-center justify-between py-2 border-b border-surface-variant">
-              <span className="font-label-md text-label-md text-on-surface-variant">Account ID</span>
-              <span className="font-body-md text-body-md text-on-surface">{account.id}</span>
+            <div className="grid gap-1 border-b border-surface-variant py-2.5 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline sm:gap-3">
+              <span className="text-sm font-medium leading-5 text-slate-600">Account ID</span>
+              <span className="min-w-0 text-sm leading-6 text-on-surface [overflow-wrap:anywhere]">{account.id}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-surface-variant">
-              <span className="font-label-md text-label-md text-on-surface-variant">Account Name</span>
-              <span className="font-body-md text-body-md text-on-surface">{account.name}</span>
+            <div className="grid gap-1 border-b border-surface-variant py-2.5 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline sm:gap-3">
+              <span className="text-sm font-medium leading-5 text-slate-600">Account Name</span>
+              <span className="min-w-0 text-sm leading-6 text-on-surface [overflow-wrap:anywhere]">{account.name}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-surface-variant">
-              <span className="font-label-md text-label-md text-on-surface-variant">Currency</span>
-              <span className="font-body-md text-body-md text-on-surface">{account.currency}</span>
+            <div className="grid gap-1 border-b border-surface-variant py-2.5 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline sm:gap-3">
+              <span className="text-sm font-medium leading-5 text-slate-600">Currency</span>
+              <span className="min-w-0 text-sm leading-6 text-on-surface [overflow-wrap:anywhere]">{account.currency}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-surface-variant">
-              <span className="font-label-md text-label-md text-on-surface-variant">Time Zone</span>
-              <span className="font-body-md text-body-md text-on-surface">{account.timeZone}</span>
+            <div className="grid gap-1 border-b border-surface-variant py-2.5 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline sm:gap-3">
+              <span className="text-sm font-medium leading-5 text-slate-600">Time Zone</span>
+              <span className="min-w-0 text-sm leading-6 text-on-surface [overflow-wrap:anywhere]">{account.timeZone}</span>
             </div>
           </div>
         )}
 
-        <div className="flex gap-3">
-          {isConnected ? (
+        {isConnected && connectionDetails && (
+          <div className="mb-6 space-y-2 rounded-lg bg-surface-container-low p-4 text-sm">
+            <div className="flex flex-wrap justify-between gap-2"><span className="text-on-surface-variant">Connection</span><span className="break-all font-mono text-on-surface">{connectionId}</span></div>
+            {connectionDetails.customerId && <div className="flex flex-wrap justify-between gap-2"><span className="text-on-surface-variant">Google Ads Customer ID</span><span className="break-all font-mono text-on-surface">{connectionDetails.customerId}</span></div>}
+            {isSharedConnection && <p role="status" className="pt-1 text-on-surface-variant">Connected by Super Admin. You can use the customer account assigned to your NEXION user.</p>}
+            {Array.isArray(connectionDetails.googleAdsAccounts) && connectionDetails.googleAdsAccounts.length > 1 && (
+              <ul className="divide-y divide-surface-variant">
+                {connectionDetails.googleAdsAccounts.map((item) => <li key={item.id} className="flex flex-wrap justify-between gap-2 py-2"><span className="text-on-surface">{item.name || 'Google Ads account'}</span><span className="break-all font-mono text-on-surface-variant">{item.id}</span></li>)}
+              </ul>
+            )}
+          </div>
+        )}
+
+        <div className="ads-actions">
+          {isConnected && isSharedConnection ? (
+            <p role="status" className="text-sm text-on-surface-variant">This connection is managed centrally by your Super Admin. You can use it for this company, but you cannot replace or disconnect it.</p>
+          ) : isConnected && isSuperAdmin ? (
             <>
               <button
                 onClick={() => setShowDisconnectConfirm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-error text-on-error font-label-md text-label-md rounded-lg hover:bg-error/90 transition-colors"
-              >
+                className="ads-button ads-button--danger"
+             >
                 <span className="material-symbols-outlined text-[18px]">link_off</span>
                 Disconnect Google Ads
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="flex items-center gap-2 px-4 py-2 bg-surface-container-low text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors border border-surface-variant"
-              >
+                className="ads-button"
+             >
                 <span className="material-symbols-outlined text-[18px]">refresh</span>
                 Reconnect Google Ads
               </button>
             </>
-          ) : (
+          ) : isConnected ? (
+            <p role="status" className="text-sm text-on-surface-variant">This connection is managed by your Super Admin. Contact them to change or disconnect it.</p>
+          ) : isSuperAdmin ? (
             <button
               onClick={() => window.location.href = '/google-ads/connect'}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary/90 transition-colors"
-            >
+              className="ads-button ads-button--primary"
+           >
               <span className="material-symbols-outlined text-[18px]">link</span>
               Connect Google Ads
             </button>
-          )}
+          ) : <p role="status" className="text-sm text-on-surface-variant">Google Ads access has not been assigned to your account. Please contact your Super Admin.</p>}
         </div>
       </div>
 
       {isSuperAdmin && (
-        <section className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft p-6 space-y-4">
+        <section className="ads-card ads-card-padding space-y-4">
           <div>
-            <h3 className="font-headline-sm text-headline-sm text-primary">Customer assignments</h3>
+            <h3 className="ads-section-title">Customer assignments</h3>
             <p className="mt-1 text-sm text-on-surface-variant">Assign one accessible Google Ads customer account to a Nexion user.</p>
           </div>
-          <form onSubmit={saveAssignment} className="grid gap-3 sm:grid-cols-3">
-            <input required value={assignmentUserId} onChange={(e) => setAssignmentUserId(e.target.value)} placeholder="Nexion user ID" aria-label="Nexion user ID" className="rounded-lg border border-surface-variant bg-surface px-3 py-2" />
-            <input required value={connectionId || ''} readOnly placeholder="Manager connection" aria-label="Manager connection" className="rounded-lg border border-surface-variant bg-surface px-3 py-2" />
-            <div className="flex gap-2"><input required value={assignmentCustomerId} onChange={(e) => setAssignmentCustomerId(e.target.value)} placeholder="Google Ads customer ID" aria-label="Google Ads customer ID" className="min-w-0 flex-1 rounded-lg border border-surface-variant bg-surface px-3 py-2" /><button disabled={!connectionId} className="rounded-lg bg-primary px-4 py-2 text-on-primary disabled:opacity-50">Assign</button></div>
+          <form onSubmit={saveAssignment} className="grid min-w-0 gap-3 sm:grid-cols-2">
+            <input required value={assignmentUserId} onChange={(e) => setAssignmentUserId(e.target.value)} placeholder="Nexion user ID" aria-label="Nexion user ID" className="ads-control" />
+            <input required value={connectionId || ''} readOnly placeholder="Manager connection" aria-label="Manager connection" className="ads-control" />
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 sm:col-span-2"><input required value={assignmentCustomerId} onChange={(e) => setAssignmentCustomerId(e.target.value)} placeholder="Google Ads customer ID" aria-label="Google Ads customer ID" className="ads-control" /><button disabled={!connectionId} className="ads-button ads-button--primary shrink-0">Assign</button></div>
           </form>
           {assignmentError && <p role="alert" className="text-sm text-error">{assignmentError}</p>}
           {assignmentSaved && <p role="status" className="text-sm text-google-ads-green">Customer assignment saved.</p>}
@@ -153,8 +170,8 @@ export default function Settings() {
         </section>
       )}
 
-      <div className="bg-surface-container-lowest border border-surface-variant rounded-xl shadow-soft p-6">
-        <h3 className="font-headline-sm text-headline-sm text-primary mb-4 flex items-center gap-2">
+      <div className="ads-card ads-card-padding">
+        <h3 className="ads-section-title mb-4 flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">info</span>
           Connection Details
         </h3>
@@ -164,7 +181,7 @@ export default function Settings() {
             Google Ads data. No credentials are stored in the frontend.
           </p>
           <p className="text-on-surface-variant">
-            The Google Ads backend at <code className="bg-surface-container-low px-2 py-1 rounded text-google-ads-blue">{GOOGLE_ADS_BACKEND || window.location.origin}</code> handles
+            The Google Ads backend at <code className="break-all rounded bg-surface-container-low px-2 py-1 text-blue-800">{GOOGLE_ADS_BACKEND || window.location.origin}</code> handles
             all OAuth token management. Tokens are securely stored on the backend.
           </p>
           <p className="text-on-surface-variant">

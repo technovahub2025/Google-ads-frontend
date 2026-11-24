@@ -32,11 +32,12 @@ export default function DateRangeSelector({ value = 'last_30_days', onChange, cu
   }
 
   return (
-    <div className="relative inline-block" ref={dropdownRef}>
+    <div className="relative inline-block max-w-full" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-surface-container-low border border-surface-variant text-on-surface font-label-md text-label-md rounded-lg px-3 py-2 hover:bg-surface-container transition-colors"
+        className="ads-button"
+        aria-expanded={isOpen}
       >
         <span className="material-symbols-outlined text-[18px]">date_range</span>
         <span>{selectedLabel}</span>
@@ -51,16 +52,16 @@ export default function DateRangeSelector({ value = 'last_30_days', onChange, cu
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-52 bg-surface-container-lowest border border-surface-variant rounded-xl shadow-lg z-[100] py-1">
+        <div className="ads-card absolute left-0 z-[100] mt-2 max-h-[50dvh] w-52 max-w-[calc(100vw-2rem)] overflow-y-auto p-1 shadow-lg sm:left-auto sm:right-0">
           {PRESET_RANGES.map((range) => (
             <button
               key={range.value}
               type="button"
               onClick={() => handleSelect(range.value)}
-              className={`w-full text-left px-4 py-2 font-label-md text-label-md transition-colors ${
+              className={`min-h-9 w-full rounded-md px-3 py-2 text-left text-sm font-medium focus-visible:outline-offset-[-2px] motion-safe:transition-colors ${
                 value === range.value
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                  ? 'bg-secondary-container text-blue-800'
+                  : 'text-slate-700 hover:bg-surface-container hover:text-on-surface'
               }`}
             >
               {range.label}
