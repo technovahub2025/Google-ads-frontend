@@ -10,7 +10,7 @@ const cardTitleClass = 'ads-section-title'
 const detailLabelClass = 'text-xs font-medium leading-5 text-slate-600 sm:text-sm'
 const detailValueClass = 'mt-1 break-words text-sm font-semibold leading-6 text-on-surface sm:text-base'
 const guidanceClass = 'ads-description'
-const billingSummaryUrl = 'https://ads.google.com/aw/billing/summary'
+const billingSummaryUrl = (customerId) => `https://ads.google.com/aw/billing/summary?__c=${encodeURIComponent(customerId)}`
 const billingHelpUrl = 'https://support.google.com/google-ads/answer/2497582?hl=en'
 const googleAdsAndroidUrl = 'https://play.google.com/store/apps/details?id=com.google.android.apps.adwords'
 
@@ -38,7 +38,7 @@ function PaymentGuidance({ arrangement, customerId }) {
           <p>For UPI in India, use the Google Ads Android app and choose UPI if it appears under Billing → Summary → Make a payment. Google determines eligibility, which includes prepaid billing in INR, an Indian billing address, and a UPI-enabled Indian bank account.</p>
           <p>Check Available Funds in Billing → Summary and use Billing Activity to see whether Google has posted your payment.</p>
           <div className="flex flex-col gap-2 border-t border-primary/20 pt-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <a href={billingSummaryUrl} target="_blank" rel="noopener noreferrer" className={`${buttonClass} ads-button--primary`}>
+            <a href={billingSummaryUrl(customerId)} target="_blank" rel="noopener noreferrer" className={`${buttonClass} ads-button--primary`}>
               {/* Lucide Circle Plus (ISC) */}
               <svg aria-hidden="true" className="size-[18px] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
