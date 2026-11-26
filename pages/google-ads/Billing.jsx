@@ -27,6 +27,15 @@ const billingError = (error) => {
   return billingErrors.get(error.code) || 'Google Ads billing is temporarily unavailable. Try again.'
 }
 
+function formatAvailableFunds(availableFunds, currency) {
+  if (availableFunds?.status !== 'available' || availableFunds.amount === null || availableFunds.amount === undefined) return 'Balance unavailable'
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: availableFunds.currency || currency || 'INR' }).format(availableFunds.amount)
+  } catch {
+    return `${availableFunds.amount} ${availableFunds.currency || currency || ''}`.trim()
+  }
+}
+
 function PaymentGuidance({ arrangement, customerId }) {
   switch (arrangement) {
     case 'prepaid':
@@ -119,6 +128,7 @@ export default function Billing() {
             <section aria-labelledby="billing-payment" className={`${cardClass} space-y-4`}>
               <h2 id="billing-payment" className={cardTitleClass}>Payment setting</h2>
               <PaymentGuidance arrangement={billing.paymentArrangement} customerId={billing.account.customerId} />
+              <p className={guidanceClass}><strong>Available funds:</strong> {formatAvailableFunds(billing.availableFunds, billing.account.currency)}</p>
             </section>
           </>
         )}
